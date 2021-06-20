@@ -8,8 +8,10 @@ package com.leon.disruptor;
 // 3 Event Handlers listening (JournalConsumer, ReplicationConsumer and ApplicationConsumer) to the Disruptor,
 // each of these Event Handlers will receive all of the messages available in the Disruptor (in the same order).
 
+import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
+import com.lmax.disruptor.dsl.ProducerType;
 import com.lmax.disruptor.util.DaemonThreadFactory;
 import java.time.Duration;
 import java.time.Instant;
@@ -25,10 +27,15 @@ public class DistruptorMain
         int bufferSize = 4096;
 
         // Construct the Disruptor
-        Disruptor<DistruptorEvent> disruptor = new Disruptor<>(factory, bufferSize, DaemonThreadFactory.INSTANCE);
+        Disruptor<DistruptorEvent> disruptor = new Disruptor<>(factory, bufferSize,
+                DaemonThreadFactory.INSTANCE, ProducerType.SINGLE, new BlockingWaitStrategy());
 
         // Connect the handler
-        disruptor.handleEventsWith(new PositionEventHandler());
+        // You can also use a lambda expression:
+        // disruptor.handleEventsWith((event, sequence, endOfBatch) -> System.out.println("Event: " + event));
+
+        disruptor.handleEventsWith(new ReplicationEventHandler(), new JournalEventHandler())
+                .then(new PositionEventHandler());
 
         // Start the Disruptor, starts all threads running
         disruptor.start();
@@ -40,15 +47,20 @@ public class DistruptorMain
 
         Instant currentTimeStamp = Instant.now();
 
-        int max = 30000000;
+        int max = 10;
 
         for (int count = 0; count < max; count++)
         {
+            // You can also use a lambda expression:
+            //final int value = count;
+            // ringBuffer.publishEvent((event, sequence, buffer) -> event.setPositionRequest(PositionRequest.lockCashPosition(value, value)));
+
             producer.onData(PositionRequest.lockCashPosition(count, count));
         }
 
+        // Need a sequence barrier here so that below message is printed last.
         System.out.println(String.format("Time taken to process %d events is %dms.", max, Duration.between(currentTimeStamp, Instant.now()).toMillis()));
-
+        // disruptor.halt();
         disruptor.shutdown();
     }
 }

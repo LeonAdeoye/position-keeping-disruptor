@@ -2,8 +2,6 @@ package com.leon.disruptor;
 
 import com.lmax.disruptor.RingBuffer;
 
-import java.nio.ByteBuffer;
-
 public class PositionEventProducer
 {
     private final RingBuffer<DistruptorEvent> ringBuffer;
