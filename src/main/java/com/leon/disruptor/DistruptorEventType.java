@@ -13,3 +13,9 @@ enum DistruptorEventRequestType
     LOCK,
     UNLOCK
 }
+
+enum OutcomeType
+{
+    SUCCESS,
+    FAILURE
+}

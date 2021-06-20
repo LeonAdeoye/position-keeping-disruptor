@@ -1,9 +1,9 @@
 package com.leon.disruptor;
 
-public class ClientCashPositionService
+public class ClientCashPositionService implements PositionService
 {
-    public boolean check(int clientId, double cashAmount)
+    public PositionResponse check(PositionRequest positionRequest)
     {
-        return true;
+        return new PositionResponse(100, OutcomeType.SUCCESS, positionRequest.getClientId(), positionRequest.getRIC(), positionRequest.getEventType(), positionRequest.getRequestType());
     }
 }

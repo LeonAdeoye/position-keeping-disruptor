@@ -12,10 +12,10 @@ public class PositionEventHandler implements EventHandler<DistruptorEvent>
         switch(event.getPositionRequest().getEventType())
         {
             case CASH:
-                cashPositionService.check(event.getPositionRequest().getClientId(),event.getPositionRequest().getDelta());
+                cashPositionService.check(event.getPositionRequest());
                 break;
             case STOCK:
-                stockPositionService.check(event.getPositionRequest().getClientId(), event.getPositionRequest().getRIC(), event.getPositionRequest().getDelta());
+                stockPositionService.check(event.getPositionRequest());
                 break;
             default:
                 throw new UnsupportedOperationException(event.getPositionRequest().getEventType().toString());

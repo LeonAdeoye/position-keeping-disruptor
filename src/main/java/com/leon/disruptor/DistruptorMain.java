@@ -11,8 +11,6 @@ package com.leon.disruptor;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.util.DaemonThreadFactory;
-
-import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.time.Instant;
 
@@ -24,7 +22,7 @@ public class DistruptorMain
         DistruptorEventFactory factory = new DistruptorEventFactory();
 
         // Specify the size of the ring buffer, must be power of 2.
-        int bufferSize = 2048;
+        int bufferSize = 4096;
 
         // Construct the Disruptor
         Disruptor<DistruptorEvent> disruptor = new Disruptor<>(factory, bufferSize, DaemonThreadFactory.INSTANCE);
