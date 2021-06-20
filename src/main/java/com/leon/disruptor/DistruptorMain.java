@@ -34,8 +34,8 @@ public class DistruptorMain
         // You can also use a lambda expression:
         // disruptor.handleEventsWith((event, sequence, endOfBatch) -> System.out.println("Event: " + event));
 
-        disruptor.handleEventsWith(new ReplicationEventHandler(), new JournalEventHandler())
-                .then(new PositionEventHandler());
+        disruptor.handleEventsWith(new ReplicationEventHandler(), new JournalEventHandler()).then(new PositionEventHandler());
+        //disruptor.handleEventsWith(new ReplicationEventHandler()).then(new JournalEventHandler()).then(new PositionEventHandler());
 
         // Start the Disruptor, starts all threads running
         disruptor.start();
