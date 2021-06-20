@@ -4,22 +4,9 @@ import com.lmax.disruptor.EventHandler;
 
 public class PositionEventHandler implements EventHandler<DistruptorEvent>
 {
-    ClientStockPositionService stockPositionService = new ClientStockPositionService();
-    ClientCashPositionService cashPositionService = new ClientCashPositionService();
-
     public void onEvent(DistruptorEvent event, long sequence, boolean endOfBatch)
     {
-        switch(event.getPositionRequest().getEventType())
-        {
-            case CASH:
-                cashPositionService.check(event.getPositionRequest());
-                break;
-            case STOCK:
-                stockPositionService.check(event.getPositionRequest());
-                break;
-            default:
-                throw new UnsupportedOperationException(event.getPositionRequest().getEventType().toString());
-        }
+        PositionServiceFactory.getInstance(event.getPositionRequest().getEventType()).check(event.getPositionRequest());
 
         if(event.getPositionRequest().getClientId() % 5000000 == 0)
             System.out.println(event);
