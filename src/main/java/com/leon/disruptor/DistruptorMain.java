@@ -55,7 +55,7 @@ public class DistruptorMain
             //final int value = count;
             // ringBuffer.publishEvent((event, sequence, buffer) -> event.setPositionRequest(PositionRequest.lockCashPosition(value, value)));
 
-            producer.onData(PositionRequest.lockCashPosition(count, count));
+            producer.onData(PositionRequest.lockCashPosition(count, count * 1000));
         }
 
         // Need a sequence barrier here so that below message is printed last.
