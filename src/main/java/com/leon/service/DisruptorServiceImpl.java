@@ -1,4 +1,4 @@
-package com.leon.disruptor;
+package com.leon.service;
 
 // This is the biggest behavioural difference between queues and the Disruptor. When you have multiple consumers listening on the same Disruptor
 // all events are published to all consumers in contrast to a queue where a single event will only be sent to a single consumer.
@@ -8,34 +8,40 @@ package com.leon.disruptor;
 // 3 Event Handlers listening (JournalConsumer, ReplicationConsumer and ApplicationConsumer) to the Disruptor,
 // each of these Event Handlers will receive all of the messages available in the Disruptor (in the same order).
 
+import com.leon.disruptor.*;
 import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 import com.lmax.disruptor.util.DaemonThreadFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import java.time.Duration;
 import java.time.Instant;
 
-public class DistruptorMain
+@Service
+public class DisruptorServiceImpl implements DisruptorService
 {
-    public static void main(final String[] args)
+    private int counter;
+    private long timeTaken = 0;
+    private Disruptor<DistruptorEvent> disruptor;
+
+    @Autowired
+    ConfigurationServiceImpl configurationService;
+
+    @Override
+    public void start()
     {
+        counter = 0;
         // The factory for the event
         DistruptorEventFactory factory = new DistruptorEventFactory();
 
-        // Specify the size of the ring buffer, must be power of 2.
-        int bufferSize = 4096;
-
         // Construct the Disruptor
-        Disruptor<DistruptorEvent> disruptor = new Disruptor<>(factory, bufferSize,
+        Disruptor<DistruptorEvent> disruptor = new Disruptor<>(factory, configurationService.getBufferSize(),
                 DaemonThreadFactory.INSTANCE, ProducerType.SINGLE, new BlockingWaitStrategy());
 
-        // Connect the handler
-        // You can also use a lambda expression:
-        // disruptor.handleEventsWith((event, sequence, endOfBatch) -> System.out.println("Event: " + event));
-
         disruptor.handleEventsWith(new ReplicationEventHandler(), new JournalEventHandler()).then(new PositionEventHandler());
-        //disruptor.handleEventsWith(new ReplicationEventHandler()).then(new JournalEventHandler()).then(new PositionEventHandler());
 
         // Start the Disruptor, starts all threads running
         disruptor.start();
@@ -51,16 +57,22 @@ public class DistruptorMain
 
         for (int count = 0; count < max; count++)
         {
-            // You can also use a lambda expression:
-            //final int value = count;
-            // ringBuffer.publishEvent((event, sequence, buffer) -> event.setPositionRequest(PositionRequest.lockCashPosition(value, value)));
-
             producer.onData(PositionRequest.lockCashPosition(count, count * 1000));
         }
 
-        // Need a sequence barrier here so that below message is printed last.
-        System.out.println(String.format("Time taken to process %d events is %dms.", max, Duration.between(currentTimeStamp, Instant.now()).toMillis()));
-        // disruptor.halt();
+        timeTaken = Duration.between(currentTimeStamp, Instant.now()).toMillis();
+    }
+
+    @Override
+    public void stop()
+    {
+        System.out.println(String.format("Time taken to process %d events is %dms.", counter, timeTaken));
+        disruptor.halt();
         disruptor.shutdown();
+    }
+
+    public static void main(final String[] args)
+    {
+
     }
 }

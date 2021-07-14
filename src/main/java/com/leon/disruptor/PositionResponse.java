@@ -1,5 +1,8 @@
 package com.leon.disruptor;
 
+import com.leon.service.DistruptorEventType;
+import com.leon.service.OutcomeType;
+
 import java.util.Objects;
 
 public class PositionResponse
