@@ -71,9 +71,4 @@ public class DisruptorServiceImpl implements DisruptorService
         disruptor.halt();
         disruptor.shutdown();
     }
-
-    public static void main(final String[] args)
-    {
-
-    }
 }

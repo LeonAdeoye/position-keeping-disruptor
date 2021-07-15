@@ -1,11 +1,13 @@
 package com.leon.service;
 
-import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
 
-@Service
+@Configuration
 public class ConfigurationServiceImpl
 {
-    private int bufferSize = 4096;
+    @Value("bufferSize")
+    private int bufferSize;
 
     int getBufferSize()
     {
