@@ -1,6 +1,6 @@
 package com.leon.event;
 
-enum DistruptorEventRequestType
+public enum DistruptorEventRequestType
 {
     LOCK,
     UNLOCK
