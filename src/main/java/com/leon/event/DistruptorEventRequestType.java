@@ -1,4 +1,4 @@
-package com.leon.disruptor;
+package com.leon.event;
 
 enum DistruptorEventRequestType
 {
