@@ -16,7 +16,7 @@ public class JournalEventHandler implements EventHandler<DistruptorEvent>
         ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
         try
         {
-            logger.info(mapper.writeValueAsString(event.getPositionRequest()));
+            logger.info(mapper.writeValueAsString(event.getPayload()));
         }
         catch(JsonProcessingException jpe)
         {

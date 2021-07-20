@@ -4,27 +4,27 @@ package com.leon.event;
 // one that will pass a single long value from a producer to a consumer, where the consumer will
 // simply print out the value. Firstly we will define the Event that will carry the data.
 
-import com.leon.disruptor.PositionRequest;
+import com.leon.io.Payload;
 
 public class DistruptorEvent
 {
-    private PositionRequest positionRequest;
+    private Payload payload;
 
-    public PositionRequest getPositionRequest()
+    public Payload getPayload()
     {
-        return positionRequest;
+        return payload;
     }
 
-    public void setPositionRequest(PositionRequest positionRequest)
+    public void setPayload(Payload payload)
     {
-        this.positionRequest = positionRequest;
+        this.payload = payload;
     }
 
     @Override
     public String toString()
     {
         return "DistruptorEvent{" +
-                "request=" + positionRequest +
+                "payload=" + payload +
                 '}';
     }
 }

@@ -8,8 +8,9 @@ package com.leon.service;
 // 3 Event Handlers listening (JournalConsumer, ReplicationConsumer and ApplicationConsumer) to the Disruptor,
 // each of these Event Handlers will receive all of the messages available in the Disruptor (in the same order).
 
-import com.leon.disruptor.*;
 import com.leon.event.*;
+import com.leon.io.Payload;
+import com.leon.io.PayloadProducer;
 import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
@@ -17,6 +18,7 @@ import com.lmax.disruptor.dsl.ProducerType;
 import com.lmax.disruptor.util.DaemonThreadFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -30,6 +32,9 @@ public class DisruptorServiceImpl implements DisruptorService
 
     @Autowired
     ConfigurationServiceImpl configurationService;
+
+    @Autowired
+    MessageService messageService;
 
     @Override
     public void start()
@@ -50,12 +55,14 @@ public class DisruptorServiceImpl implements DisruptorService
         // Get the ring buffer from the Disruptor to be used for publishing.
         RingBuffer<DistruptorEvent> ringBuffer = disruptor.getRingBuffer();
 
-        PositionEventProducer producer = new PositionEventProducer(ringBuffer);
+        PayloadProducer producer = new PayloadProducer(ringBuffer);
 
         Instant currentTimeStamp = Instant.now();
 
         // TODO
-        //producer.onData();
+        Flux<Payload> payLoad = messageService.readAll();
+
+        payLoad.subscribe(producer::onData);
 
         timeTaken = Duration.between(currentTimeStamp, Instant.now()).toMillis();
     }
