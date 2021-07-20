@@ -3,7 +3,6 @@ package com.leon.event;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.leon.service.PayloadServiceFactory;
 import com.lmax.disruptor.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +16,7 @@ public class ProcessorEventHandler implements EventHandler<DistruptorEvent>
     {
         try
         {
-            logger.info(mapper.writeValueAsString(PayloadServiceFactory.getInstance(event.getPayload().getPayloadType())));
+            logger.info(mapper.writeValueAsString(event.getPayload()));
         }
         catch(JsonProcessingException jpe)
         {

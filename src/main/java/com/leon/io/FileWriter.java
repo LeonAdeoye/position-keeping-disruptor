@@ -3,7 +3,7 @@ package com.leon.io;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-public class FileWriter implements OutboundDeliveryMechanism
+public class FileWriter implements Writer
 {
     @Override
     public void initialize()

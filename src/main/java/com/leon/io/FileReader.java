@@ -3,7 +3,7 @@ package com.leon.io;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-public class FileReader implements InboundDeliveryMechanism
+public class FileReader implements Reader
 {
     @Override
     public void initialize()

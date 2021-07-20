@@ -1,7 +1,7 @@
 package com.leon.service;
 
-import com.leon.io.InboundDeliveryMechanism;
-import com.leon.io.OutboundDeliveryMechanism;
+import com.leon.io.Reader;
+import com.leon.io.Writer;
 import com.leon.io.Payload;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -10,40 +10,42 @@ import reactor.core.publisher.Mono;
 @Service
 public class MessageServiceImpl implements MessageService
 {
-    private InboundDeliveryMechanism inboundDeliveryMechanism;
-    private OutboundDeliveryMechanism outboundDeliveryMechanism;
+    private Reader reader;
+    private Writer writer;
 
-    void setInboundDeliveryMechanism(InboundDeliveryMechanism inboundDeliveryMechanism)
+    @Override
+    public void setReader(Reader reader)
     {
-        this.inboundDeliveryMechanism = inboundDeliveryMechanism;
+        this.reader = reader;
     }
 
-    void setOutboundDeliveryMechanism(OutboundDeliveryMechanism outboundDeliveryMechanism)
+    @Override
+    public void setWriter(Writer writer)
     {
-        this.outboundDeliveryMechanism = outboundDeliveryMechanism;
+        this.writer = writer;
     }
 
     @Override
     public Flux<Payload> readAll()
     {
-        return inboundDeliveryMechanism.readAll();
+        return reader.readAll();
     }
 
     @Override
     public Mono<Payload> read()
     {
-        return inboundDeliveryMechanism.read();
+        return reader.read();
     }
 
     @Override
     public void write(Mono<Payload> payload)
     {
-        outboundDeliveryMechanism.write(payload);
+        writer.write(payload);
     }
 
     @Override
     public int writeAll(Flux<Payload> payload)
     {
-        return outboundDeliveryMechanism.writeAll(payload);
+        return writer.writeAll(payload);
     }
 }

@@ -9,6 +9,8 @@ package com.leon.service;
 // each of these Event Handlers will receive all of the messages available in the Disruptor (in the same order).
 
 import com.leon.event.*;
+import com.leon.io.FileReader;
+import com.leon.io.FileWriter;
 import com.leon.io.PayloadProducer;
 import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.RingBuffer;
@@ -32,7 +34,7 @@ public class DisruptorServiceImpl implements DisruptorService
     ConfigurationServiceImpl configurationService;
 
     @Autowired
-    MessageServiceImpl messageService;
+    MessageService messageService;
 
     @Override
     public void start()
@@ -57,10 +59,8 @@ public class DisruptorServiceImpl implements DisruptorService
 
         Instant currentTimeStamp = Instant.now();
 
-        // TODO
-        messageService.setInboundDeliveryMechanism(null);
-        messageService.setOutboundDeliveryMechanism(null);
-
+        messageService.setReader(new FileReader());
+        messageService.setWriter(new FileWriter());
         messageService.readAll().subscribe(producer::onData);
 
         timeTaken = Duration.between(currentTimeStamp, Instant.now()).toMillis();
