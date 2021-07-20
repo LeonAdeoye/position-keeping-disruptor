@@ -54,12 +54,8 @@ public class DisruptorServiceImpl implements DisruptorService
 
         Instant currentTimeStamp = Instant.now();
 
-        int max = 10;
-
-        for (int count = 0; count < max; count++)
-        {
-            producer.onData(PositionRequest.lockCashPosition(count, count * 1000));
-        }
+        // TODO
+        //producer.onData();
 
         timeTaken = Duration.between(currentTimeStamp, Instant.now()).toMillis();
     }
