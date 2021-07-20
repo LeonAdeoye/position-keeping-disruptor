@@ -9,7 +9,6 @@ package com.leon.service;
 // each of these Event Handlers will receive all of the messages available in the Disruptor (in the same order).
 
 import com.leon.event.*;
-import com.leon.io.Payload;
 import com.leon.io.PayloadProducer;
 import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.RingBuffer;
@@ -18,7 +17,6 @@ import com.lmax.disruptor.dsl.ProducerType;
 import com.lmax.disruptor.util.DaemonThreadFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -34,7 +32,7 @@ public class DisruptorServiceImpl implements DisruptorService
     ConfigurationServiceImpl configurationService;
 
     @Autowired
-    MessageService messageService;
+    MessageServiceImpl messageService;
 
     @Override
     public void start()
@@ -47,7 +45,7 @@ public class DisruptorServiceImpl implements DisruptorService
         Disruptor<DistruptorEvent> disruptor = new Disruptor<>(factory, configurationService.getBufferSize(),
                 DaemonThreadFactory.INSTANCE, ProducerType.SINGLE, new BlockingWaitStrategy());
 
-        disruptor.handleEventsWith(new ReplicationEventHandler(), new JournalEventHandler()).then(new PositionEventHandler());
+        disruptor.handleEventsWith(new ReplicationEventHandler(), new JournalEventHandler()).then(new ProcessorEventHandler());
 
         // Start the Disruptor, starts all threads running
         disruptor.start();
@@ -60,9 +58,10 @@ public class DisruptorServiceImpl implements DisruptorService
         Instant currentTimeStamp = Instant.now();
 
         // TODO
-        Flux<Payload> payLoad = messageService.readAll();
+        messageService.setInboundDeliveryMechanism(null);
+        messageService.setOutboundDeliveryMechanism(null);
 
-        payLoad.subscribe(producer::onData);
+        messageService.readAll().subscribe(producer::onData);
 
         timeTaken = Duration.between(currentTimeStamp, Instant.now()).toMillis();
     }

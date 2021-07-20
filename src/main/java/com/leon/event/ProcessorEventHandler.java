@@ -8,9 +8,9 @@ import com.lmax.disruptor.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PositionEventHandler implements EventHandler<DistruptorEvent>
+public class ProcessorEventHandler implements EventHandler<DistruptorEvent>
 {
-    private static final Logger logger = LoggerFactory.getLogger(PositionEventHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProcessorEventHandler.class);
     ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
     public void onEvent(DistruptorEvent event, long sequence, boolean endOfBatch)
