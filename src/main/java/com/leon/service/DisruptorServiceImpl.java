@@ -39,7 +39,7 @@ public class DisruptorServiceImpl implements DisruptorService
     MessageService messageService;
 
     @Override
-    public void start(String name, EventHandler<DisruptorEvent> journalHandler, EventHandler<DisruptorEvent> actionEventHandler)
+    public void start(String name, EventHandler<DisruptorEvent> journalHandler, EventHandler<DisruptorEvent> actionEventHandler, MessageService messageService)
     {
         counter = 0;
         // The factory for the event

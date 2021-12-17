@@ -6,7 +6,7 @@ import com.lmax.disruptor.EventHandler;
 
 public interface DisruptorService
 {
-    void start(String name, EventHandler<DisruptorEvent> journalHandler, EventHandler<DisruptorEvent> actionEventHandler);
+    void start(String name, EventHandler<DisruptorEvent> journalHandler, EventHandler<DisruptorEvent> actionEventHandler, MessageService messageService);
     void stop();
     void push(DisruptorPayload payLoad);
 }
