@@ -8,27 +8,29 @@ package com.leon.service;
 // 3 Event Handlers listening (JournalConsumer, ReplicationConsumer and ApplicationConsumer) to the Disruptor,
 // each of these Event Handlers will receive all of the messages available in the Disruptor (in the same order).
 
-import com.leon.event.*;
-import com.leon.io.FileReader;
-import com.leon.io.FileWriter;
-import com.leon.io.PayloadProducer;
+import com.leon.model.DisruptorEvent;
+import com.leon.model.DisruptorEventFactory;
+import com.leon.model.DisruptorPayload;
 import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 import com.lmax.disruptor.util.DaemonThreadFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import com.lmax.disruptor.EventHandler;
 import java.time.Duration;
 import java.time.Instant;
 
 @Service
 public class DisruptorServiceImpl implements DisruptorService
 {
+    private static final Logger logger = LoggerFactory.getLogger(DisruptorServiceImpl.class);
     private int counter;
     private long timeTaken = 0;
-    private Disruptor<DistruptorEvent> disruptor;
+    private Disruptor<DisruptorEvent> disruptor;
 
     @Autowired
     ConfigurationServiceImpl configurationService;
@@ -37,31 +39,24 @@ public class DisruptorServiceImpl implements DisruptorService
     MessageService messageService;
 
     @Override
-    public void start()
+    public void start(String name, EventHandler<DisruptorEvent> journalHandler, EventHandler<DisruptorEvent> actionEventHandler)
     {
         counter = 0;
         // The factory for the event
-        DistruptorEventFactory factory = new DistruptorEventFactory();
+        DisruptorEventFactory factory = new DisruptorEventFactory();
 
         // Construct the Disruptor
-        Disruptor<DistruptorEvent> disruptor = new Disruptor<>(factory, configurationService.getBufferSize(),
+        Disruptor<DisruptorEvent> disruptor = new Disruptor<DisruptorEvent>(factory, configurationService.getBufferSize(),
                 DaemonThreadFactory.INSTANCE, ProducerType.SINGLE, new BlockingWaitStrategy());
 
-        disruptor.handleEventsWith(new ReplicationEventHandler(), new JournalEventHandler()).then(new ProcessorEventHandler());
+        disruptor.handleEventsWith(journalHandler).then(actionEventHandler);
 
         // Start the Disruptor, starts all threads running
         disruptor.start();
 
         // Get the ring buffer from the Disruptor to be used for publishing.
-        RingBuffer<DistruptorEvent> ringBuffer = disruptor.getRingBuffer();
-
-        PayloadProducer producer = new PayloadProducer(ringBuffer);
-
+        RingBuffer<DisruptorEvent> ringBuffer = disruptor.getRingBuffer();
         Instant currentTimeStamp = Instant.now();
-
-        messageService.setReader(new FileReader());
-        messageService.setWriter(new FileWriter());
-        messageService.readAll().subscribe(producer::onData);
 
         timeTaken = Duration.between(currentTimeStamp, Instant.now()).toMillis();
     }
@@ -72,5 +67,11 @@ public class DisruptorServiceImpl implements DisruptorService
         System.out.println(String.format("Time taken to process %d events is %dms.", counter, timeTaken));
         disruptor.halt();
         disruptor.shutdown();
+    }
+
+    @Override
+    public void push(DisruptorPayload payLoad)
+    {
+
     }
 }

@@ -1,4 +1,4 @@
-package com.leon.service;
+package com.leon.model;
 
 public enum OutcomeType
 {

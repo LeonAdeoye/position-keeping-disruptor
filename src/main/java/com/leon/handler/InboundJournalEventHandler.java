@@ -1,17 +1,18 @@
-package com.leon.event;
+package com.leon.handler;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.lmax.disruptor.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.leon.model.DisruptorEvent;
 
-public class JournalEventHandler implements EventHandler<DistruptorEvent>
+public class InboundJournalEventHandler implements EventHandler<DisruptorEvent>
 {
-    private static final Logger logger = LoggerFactory.getLogger(JournalEventHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(InboundJournalEventHandler.class);
 
-    public void onEvent(DistruptorEvent event, long sequence, boolean endOfBatch)
+    public void onEvent(DisruptorEvent event, long sequence, boolean endOfBatch)
     {
         ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
         try

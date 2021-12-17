@@ -1,8 +1,8 @@
 package com.leon.service;
 
-import com.leon.io.Reader;
-import com.leon.io.Writer;
-import com.leon.io.Payload;
+import com.leon.io.DisruptorReader;
+import com.leon.io.DisruptorWriter;
+import com.leon.model.DisruptorPayload;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -10,41 +10,41 @@ import reactor.core.publisher.Mono;
 @Service
 public class MessageServiceImpl implements MessageService
 {
-    private Reader reader;
-    private Writer writer;
+    private DisruptorReader reader;
+    private DisruptorWriter writer;
 
     @Override
-    public void setReader(Reader reader)
+    public void setReader(DisruptorReader reader)
     {
         this.reader = reader;
     }
 
     @Override
-    public void setWriter(Writer writer)
+    public void setWriter(DisruptorWriter writer)
     {
         this.writer = writer;
     }
 
     @Override
-    public Flux<Payload> readAll()
+    public Flux<DisruptorPayload> readAll()
     {
         return reader.readAll();
     }
 
     @Override
-    public Mono<Payload> read()
+    public Mono<DisruptorPayload> read()
     {
         return reader.read();
     }
 
     @Override
-    public void write(Mono<Payload> payload)
+    public void write(Mono<DisruptorPayload> payload)
     {
         writer.write(payload);
     }
 
     @Override
-    public int writeAll(Flux<Payload> payload)
+    public int writeAll(Flux<DisruptorPayload> payload)
     {
         return writer.writeAll(payload);
     }

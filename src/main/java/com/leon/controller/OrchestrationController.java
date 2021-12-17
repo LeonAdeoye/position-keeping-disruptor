@@ -1,21 +1,20 @@
 package com.leon.controller;
 
-import com.leon.service.DisruptorService;
+import com.leon.service.OrchestrationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-public class DisruptorController
+public class OrchestrationController
 {
-    private static final Logger logger = LoggerFactory.getLogger(DisruptorController.class);
+    private static final Logger logger = LoggerFactory.getLogger(OrchestrationController.class);
     @Autowired
-    DisruptorService disruptorService;
+    OrchestrationService orchestrationService;
 
     @CrossOrigin
     @RequestMapping("/heartbeat")
@@ -25,18 +24,18 @@ public class DisruptorController
     }
 
     @CrossOrigin
-    @RequestMapping(value = "/start", produces=MediaType.APPLICATION_JSON_VALUE )
+    @RequestMapping(value = "/start")
     void start()
     {
-        logger.info("Received request to start disruptor");
-        disruptorService.start();
+        logger.info("Received request to start orchestration");
+        orchestrationService.start();
     }
 
     @CrossOrigin
     @RequestMapping(value = "/stop")
     void stop()
     {
-        logger.info("Received request to stop disruptor");
-        disruptorService.stop();
+        logger.info("Received request to stop orchestration");
+        orchestrationService.stop();
     }
 }

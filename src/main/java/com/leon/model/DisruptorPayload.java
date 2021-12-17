@@ -1,6 +1,6 @@
-package com.leon.io;
+package com.leon.model;
 
-public class Payload
+public class DisruptorPayload
 {
     private String payloadType;
 

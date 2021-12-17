@@ -6,16 +6,27 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ConfigurationServiceImpl
 {
-    @Value("bufferSize")
+    @Value("${bufferSize}")
     private int bufferSize;
 
-    int getBufferSize()
+    @Value("${writerFileName}")
+    private String writerFileName;
+
+    @Value("${readerFileName}")
+    private String readerFileName;
+
+    public int getBufferSize()
     {
         return this.bufferSize;
     }
 
-    void setBufferSize(int bufferSize)
+    public String getWriterFileName()
     {
-        this.bufferSize = bufferSize;
+        return this.writerFileName;
+    }
+
+    public String getReaderFileName()
+    {
+        return this.readerFileName;
     }
 }
