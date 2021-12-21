@@ -89,6 +89,12 @@
             <groupId>net.openhft</groupId>
             <artifactId>chronicle-map</artifactId>
             <version>${chronicle.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.sun.java</groupId>
+                    <artifactId>tools</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
     <build>

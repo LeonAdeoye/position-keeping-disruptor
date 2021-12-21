@@ -27,7 +27,7 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
                 .name("disruptor-map")
                 .entries(1_000_000)
                 .averageValue(LocalDateTime.now())
-                .createPersistedTo(new File(System.getProperty("user.home") + "/../log/country-details.dat"));
+                .createPersistedTo(new File("../logs/disruptor-processed.txt"));
         }
         catch(IOException ioe)
         {
@@ -41,5 +41,10 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
     {
         System.out.println(event.getPayload());
         outboundDisruptor.push(event.getPayload());
+    }
+
+    public void close()
+    {
+        persistedDisruptorMap.close();
     }
 }

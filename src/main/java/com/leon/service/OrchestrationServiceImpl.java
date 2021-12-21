@@ -21,22 +21,22 @@ public class OrchestrationServiceImpl implements OrchestrationService
     @Autowired
     private DisruptorService outboundDisruptor;
     @Autowired
-    ConfigurationServiceImpl configurationService;
+    private ConfigurationServiceImpl configurationService;
     @Autowired
-    FileDisruptorReader fileReader;
+    private FileDisruptorReader fileReader;
     @Autowired
-    FileDisruptorWriter fileWriter;
+    private FileDisruptorWriter fileWriter;
     @Autowired
-    MessageService messageService;
-
-
+    private MessageService messageService;
+    private BusinessLogicEventHandler businessLogicEventHandler;
 
     @Override
     public void start()
     {
+        businessLogicEventHandler = new BusinessLogicEventHandler(outboundDisruptor);
         messageService.setReader(fileReader);
         messageService.setWriter(fileWriter);
-        inboundDisruptor.start("INBOUND", new InboundJournalEventHandler(), new BusinessLogicEventHandler(outboundDisruptor), messageService);
+        inboundDisruptor.start("INBOUND", new InboundJournalEventHandler(), businessLogicEventHandler, messageService);
         outboundDisruptor.start("OUTBOUND", new OutboundJournalEventHandler(), new PublishingEventHandler(), messageService);
         logger.info("Started inbound and outbound disruptor.");
     }
@@ -44,7 +44,7 @@ public class OrchestrationServiceImpl implements OrchestrationService
     @Override
     public void stop()
     {
-
+        businessLogicEventHandler.close();
         inboundDisruptor.stop();
         outboundDisruptor.stop();
         logger.info("Halted inbound and outbound disruptors.");
