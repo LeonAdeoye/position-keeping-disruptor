@@ -12,6 +12,7 @@
         <slf4j.version>1.7.31</slf4j.version>
         <jackson.version>2.12.3</jackson.version>
         <java.version>1.8</java.version>
+        <chronicle.version>3.17.2</chronicle.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -84,6 +85,11 @@
             <artifactId>logback-classic</artifactId>
             <version>${logback.version}</version>
         </dependency>
+        <dependency>
+            <groupId>net.openhft</groupId>
+            <artifactId>chronicle-map</artifactId>
+            <version>${chronicle.version}</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -112,12 +118,8 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>8</source>
-                    <target>8</target>
-                </configuration>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

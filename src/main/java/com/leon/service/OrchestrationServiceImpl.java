@@ -4,13 +4,14 @@ import com.leon.handler.InboundJournalEventHandler;
 import com.leon.handler.OutboundJournalEventHandler;
 import com.leon.handler.BusinessLogicEventHandler;
 import com.leon.handler.PublishingEventHandler;
-import com.leon.io.DisruptorReader;
 import com.leon.io.FileDisruptorReader;
 import com.leon.io.FileDisruptorWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class OrchestrationServiceImpl implements OrchestrationService
 {
     private static final Logger logger = LoggerFactory.getLogger(OrchestrationServiceImpl.class);
