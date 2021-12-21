@@ -19,16 +19,19 @@ import com.lmax.disruptor.util.DaemonThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import com.lmax.disruptor.EventHandler;
 import java.time.Duration;
 import java.time.Instant;
 
+@Scope("prototype")
 @Service
 public class DisruptorServiceImpl implements DisruptorService
 {
     private static final Logger logger = LoggerFactory.getLogger(DisruptorServiceImpl.class);
     private int counter;
+    private String name;
     private long timeTaken = 0;
     private Disruptor<DisruptorEvent> disruptor;
 
@@ -41,37 +44,40 @@ public class DisruptorServiceImpl implements DisruptorService
     @Override
     public void start(String name, EventHandler<DisruptorEvent> journalHandler, EventHandler<DisruptorEvent> actionEventHandler, MessageService messageService)
     {
-        counter = 0;
+        this.name = name;
+        this.counter = 0;
         // The factory for the event
         DisruptorEventFactory factory = new DisruptorEventFactory();
 
         // Construct the Disruptor
-        Disruptor<DisruptorEvent> disruptor = new Disruptor<DisruptorEvent>(factory, configurationService.getBufferSize(),
+        this.disruptor = new Disruptor<DisruptorEvent>(factory, configurationService.getBufferSize(),
                 DaemonThreadFactory.INSTANCE, ProducerType.SINGLE, new BlockingWaitStrategy());
 
-        disruptor.handleEventsWith(journalHandler).then(actionEventHandler);
+        this.disruptor.handleEventsWith(journalHandler).then(actionEventHandler);
 
         // Start the Disruptor, starts all threads running
-        disruptor.start();
+        this.disruptor.start();
 
         // Get the ring buffer from the Disruptor to be used for publishing.
         RingBuffer<DisruptorEvent> ringBuffer = disruptor.getRingBuffer();
         Instant currentTimeStamp = Instant.now();
 
-        timeTaken = Duration.between(currentTimeStamp, Instant.now()).toMillis();
+        this.timeTaken = Duration.between(currentTimeStamp, Instant.now()).toMillis();
     }
 
     @Override
     public void stop()
     {
-        System.out.println(String.format("Time taken to process %d events is %dms.", counter, timeTaken));
-        disruptor.halt();
-        disruptor.shutdown();
+        logger.info(String.format("Time taken to process %d events is %dms.", counter, timeTaken));
+        this.disruptor.halt();
+        logger.info("Halted " + name + " disruptor");
+        this.disruptor.shutdown();
+        logger.info("Shutdown " + name + " disruptor");
     }
 
     @Override
     public void push(DisruptorPayload payLoad)
     {
-
+        this.counter++;
     }
 }
