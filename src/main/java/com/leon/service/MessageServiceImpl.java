@@ -13,6 +13,12 @@ public class MessageServiceImpl implements MessageService
     private DisruptorReader reader;
     private DisruptorWriter writer;
 
+    public MessageServiceImpl(DisruptorReader reader, DisruptorWriter writer)
+    {
+        this.reader = reader;
+        this.writer = writer;
+    }
+
     @Override
     public void setReader(DisruptorReader reader)
     {

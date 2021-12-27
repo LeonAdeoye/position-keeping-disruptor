@@ -46,6 +46,7 @@ public class DisruptorServiceImpl implements DisruptorService
     {
         this.name = name;
         this.counter = 0;
+        this.messageService = messageService;
         // The factory for the event
         DisruptorEventFactory factory = new DisruptorEventFactory();
 

@@ -34,6 +34,7 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
             persistedDisruptorMap.put(qatarKey, "England");
             CharSequence country = persistedDisruptorMap.get(qatarKey);
             System.out.println("Country: " + country.toString());
+            logger.info("Created chronicle map.");
         }
         catch(IOException ioe)
         {
