@@ -40,9 +40,6 @@ public class DisruptorServiceImpl implements DisruptorService
     @Autowired
     ConfigurationServiceImpl configurationService;
 
-    @Autowired
-    MessageService messageService;
-
     @Override
     public void start(String name, EventHandler<DisruptorEvent> journalHandler, EventHandler<DisruptorEvent> actionEventHandler)
     {
@@ -71,7 +68,7 @@ public class DisruptorServiceImpl implements DisruptorService
     @Override
     public void stop()
     {
-        logger.info(counter + " events were processed. ");
+        logger.info(counter + " events were processed by " + name + " disruptor");
         this.disruptor.halt();
         logger.info("Halted " + name + " disruptor");
         this.disruptor.shutdown();

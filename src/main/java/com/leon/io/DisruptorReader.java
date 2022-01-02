@@ -10,4 +10,5 @@ public interface DisruptorReader
     void initialize(ConfigurationServiceImpl configurationService);
     Flux<DisruptorPayload> readAll();
     Mono<DisruptorPayload> read();
+    void close();
 }

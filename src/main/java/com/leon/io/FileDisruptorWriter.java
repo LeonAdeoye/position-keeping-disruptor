@@ -27,4 +27,10 @@ public class FileDisruptorWriter implements DisruptorWriter
     {
 
     }
+
+    @Override
+    public void close()
+    {
+
+    }
 }

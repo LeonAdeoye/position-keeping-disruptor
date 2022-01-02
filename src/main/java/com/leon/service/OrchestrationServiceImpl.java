@@ -26,8 +26,6 @@ public class OrchestrationServiceImpl implements OrchestrationService
     private DisruptorReader reader;
     @Autowired
     private DisruptorWriter writer;
-    @Autowired
-    private MessageService messageService;
 
     private BusinessLogicEventHandler businessLogicEventHandler;
 
@@ -36,23 +34,21 @@ public class OrchestrationServiceImpl implements OrchestrationService
     {
         reader.initialize(configurationService);
         writer.initialize(configurationService);
-        messageService.setReader(reader);
-        messageService.setWriter(writer);
-        logger.info("Initialized reading and writing.");
-
-        inboundDisruptor.start("INBOUND", new InboundJournalEventHandler(), new BusinessLogicEventHandler(outboundDisruptor));
+        logger.info("Initialized reader and writer.");
+        businessLogicEventHandler = new BusinessLogicEventHandler(outboundDisruptor);
+        inboundDisruptor.start("INBOUND", new InboundJournalEventHandler(), businessLogicEventHandler);
         outboundDisruptor.start("OUTBOUND", new OutboundJournalEventHandler(), new PublishingEventHandler(writer) );
-        logger.info("Started inbound and outbound disruptors.");
-
         reader.readAll().subscribe((request) -> inboundDisruptor.push(request));
     }
 
     @Override
     public void stop()
     {
+        reader.close();
+        writer.close();
         businessLogicEventHandler.close();
         inboundDisruptor.stop();
         outboundDisruptor.stop();
-        logger.info("Halted inbound and outbound disruptors.");
+        logger.info("Shutdown and cleanup completed.");
     }
 }

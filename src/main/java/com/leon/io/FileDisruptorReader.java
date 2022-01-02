@@ -27,4 +27,10 @@ public class FileDisruptorReader implements DisruptorReader
     {
         return Mono.empty();
     }
+
+    @Override
+    public void close()
+    {
+
+    }
 }
