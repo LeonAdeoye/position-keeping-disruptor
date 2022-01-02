@@ -12,6 +12,19 @@ import com.leon.model.DisruptorEvent;
 import java.io.File;
 import java.io.IOException;
 
+/*
+ChronicleMap Interface
+There are few specials methods which are provided by ChronicleMap. See below
+V getUsing(K key, V value); getUsing is same as get(key) but getUsing will return the value in value parameter without creating a new object whereas get will create a new object for returning the value with key.
+V acquireUsing(K key, V value); acquireUsing is again same as getUsing but if there is no value defined with key, it will insert a new entry with key and returns the same value.
+
+ChronicleMap can read and write the data from/to a JSON object. The following methods can be used to do so
+void getAll(File toFile) throws IOException; To read map from the file which was created by another ChronicleMap using JSON format.
+void putAll(File fromFile) throws IOException; To dump the entire map into a file using a JSON format.
+void close();
+As the data is stored off-heap, it's recommended to close the map to release the heap data and persist the data.
+*/
+
 public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
 {
     private static final Logger logger = LoggerFactory.getLogger(BusinessLogicEventHandler.class);

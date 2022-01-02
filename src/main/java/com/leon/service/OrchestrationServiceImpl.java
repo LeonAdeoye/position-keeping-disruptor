@@ -6,6 +6,7 @@ import com.leon.handler.BusinessLogicEventHandler;
 import com.leon.handler.PublishingEventHandler;
 import com.leon.io.DisruptorReader;
 import com.leon.io.DisruptorWriter;
+import com.leon.model.DisruptorPayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,12 +35,18 @@ public class OrchestrationServiceImpl implements OrchestrationService
     @Override
     public void start()
     {
-        businessLogicEventHandler = new BusinessLogicEventHandler(outboundDisruptor);
+        reader.initialize(configurationService);
+        writer.initialize(configurationService);
         messageService.setReader(reader);
         messageService.setWriter(writer);
+        logger.info("Initialized reading and writing.");
+
+        businessLogicEventHandler = new BusinessLogicEventHandler(outboundDisruptor);
         inboundDisruptor.start("INBOUND", new InboundJournalEventHandler(), businessLogicEventHandler, messageService);
         outboundDisruptor.start("OUTBOUND", new OutboundJournalEventHandler(), new PublishingEventHandler(), messageService);
-        logger.info("Started inbound and outbound disruptor.");
+        logger.info("Started inbound and outbound disruptors.");
+
+        messageService.readAll().subscribe((request) -> inboundDisruptor.push(request));
     }
 
     @Override

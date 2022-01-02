@@ -8,6 +8,7 @@ package com.leon.service;
 // 3 Event Handlers listening (JournalConsumer, ReplicationConsumer and ApplicationConsumer) to the Disruptor,
 // each of these Event Handlers will receive all of the messages available in the Disruptor (in the same order).
 
+import com.leon.handler.DisruptorEventProducer;
 import com.leon.model.DisruptorEvent;
 import com.leon.model.DisruptorEventFactory;
 import com.leon.model.DisruptorPayload;
@@ -34,6 +35,7 @@ public class DisruptorServiceImpl implements DisruptorService
     private String name;
     private long timeTaken = 0;
     private Disruptor<DisruptorEvent> disruptor;
+    private DisruptorEventProducer producer;
 
     @Autowired
     ConfigurationServiceImpl configurationService;
@@ -53,23 +55,24 @@ public class DisruptorServiceImpl implements DisruptorService
         // Construct the Disruptor
         this.disruptor = new Disruptor<DisruptorEvent>(factory, configurationService.getBufferSize(),
                 DaemonThreadFactory.INSTANCE, ProducerType.SINGLE, new BlockingWaitStrategy());
+        logger.info("Created " + name + " disruptor.");
 
         this.disruptor.handleEventsWith(journalHandler).then(actionEventHandler);
 
         // Start the Disruptor, starts all threads running
         this.disruptor.start();
+        logger.info("Started " + name + " disruptor.");
 
         // Get the ring buffer from the Disruptor to be used for publishing.
         RingBuffer<DisruptorEvent> ringBuffer = disruptor.getRingBuffer();
-        Instant currentTimeStamp = Instant.now();
-
-        this.timeTaken = Duration.between(currentTimeStamp, Instant.now()).toMillis();
+        this.producer = new DisruptorEventProducer(ringBuffer);
+        logger.info("Instantiated producer for " + name + " disruptor.");
     }
 
     @Override
     public void stop()
     {
-        logger.info(String.format("Time taken to process %d events is %dms.", counter, timeTaken));
+        logger.info(counter + " events were processed. ");
         this.disruptor.halt();
         logger.info("Halted " + name + " disruptor");
         this.disruptor.shutdown();
@@ -79,6 +82,7 @@ public class DisruptorServiceImpl implements DisruptorService
     @Override
     public void push(DisruptorPayload payLoad)
     {
+        this.producer.onData(payLoad);
         this.counter++;
     }
 }
