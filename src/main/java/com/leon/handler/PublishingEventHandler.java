@@ -1,27 +1,31 @@
 package com.leon.handler;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.leon.io.DisruptorWriter;
+import com.leon.model.DisruptorPayload;
 import com.lmax.disruptor.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.leon.model.DisruptorEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+import reactor.core.publisher.Mono;
 
 public class PublishingEventHandler implements EventHandler<DisruptorEvent>
 {
     private static final Logger logger = LoggerFactory.getLogger(PublishingEventHandler.class);
+    private DisruptorWriter writer;
+
+    public PublishingEventHandler(DisruptorWriter writer)
+    {
+        this.writer = writer;
+    }
 
     public void onEvent(DisruptorEvent event, long sequence, boolean endOfBatch)
     {
-        ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
-        try
+        DisruptorPayload payLoad = event.getPayload();
+        if(payLoad != null)
         {
-            logger.info(mapper.writeValueAsString(event.getPayload()));
-        }
-        catch(JsonProcessingException jpe)
-        {
-            jpe.printStackTrace();
+            logger.debug(payLoad.toString());
+            writer.write(Mono.just(payLoad));
         }
     }
 }

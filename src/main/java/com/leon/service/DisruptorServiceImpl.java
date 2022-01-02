@@ -44,11 +44,10 @@ public class DisruptorServiceImpl implements DisruptorService
     MessageService messageService;
 
     @Override
-    public void start(String name, EventHandler<DisruptorEvent> journalHandler, EventHandler<DisruptorEvent> actionEventHandler, MessageService messageService)
+    public void start(String name, EventHandler<DisruptorEvent> journalHandler, EventHandler<DisruptorEvent> actionEventHandler)
     {
         this.name = name;
         this.counter = 0;
-        this.messageService = messageService;
         // The factory for the event
         DisruptorEventFactory factory = new DisruptorEventFactory();
 
@@ -67,8 +66,6 @@ public class DisruptorServiceImpl implements DisruptorService
         RingBuffer<DisruptorEvent> ringBuffer = disruptor.getRingBuffer();
         this.producer = new DisruptorEventProducer(ringBuffer);
         logger.info("Instantiated producer for " + name + " disruptor.");
-
-        messageService.readAll().subscribe((request) -> push(request));
     }
 
     @Override
