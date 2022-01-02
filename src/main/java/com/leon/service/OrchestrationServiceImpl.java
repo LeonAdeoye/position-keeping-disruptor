@@ -45,8 +45,6 @@ public class OrchestrationServiceImpl implements OrchestrationService
         inboundDisruptor.start("INBOUND", new InboundJournalEventHandler(), businessLogicEventHandler, messageService);
         outboundDisruptor.start("OUTBOUND", new OutboundJournalEventHandler(), new PublishingEventHandler(), messageService);
         logger.info("Started inbound and outbound disruptors.");
-
-        messageService.readAll().subscribe((request) -> inboundDisruptor.push(request));
     }
 
     @Override

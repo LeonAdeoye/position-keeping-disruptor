@@ -67,6 +67,8 @@ public class DisruptorServiceImpl implements DisruptorService
         RingBuffer<DisruptorEvent> ringBuffer = disruptor.getRingBuffer();
         this.producer = new DisruptorEventProducer(ringBuffer);
         logger.info("Instantiated producer for " + name + " disruptor.");
+
+        messageService.readAll().subscribe((request) -> push(request));
     }
 
     @Override

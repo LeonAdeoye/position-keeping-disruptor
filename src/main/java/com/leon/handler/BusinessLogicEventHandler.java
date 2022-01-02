@@ -59,7 +59,7 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
 
     public void onEvent(DisruptorEvent event, long sequence, boolean endOfBatch)
     {
-        System.out.println(event.getPayload());
+        logger.debug(event.getPayload().toString());
         outboundDisruptor.push(event.getPayload());
     }
 

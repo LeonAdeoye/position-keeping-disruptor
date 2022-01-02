@@ -13,4 +13,10 @@ public class DisruptorPayload
     {
         this.payloadType = payloadType;
     }
+
+    @Override
+    public String toString()
+    {
+        return "DisruptorPayload { payloadType='" + payloadType + "'}";
+    }
 }
