@@ -4,6 +4,11 @@ public class DisruptorPayload
 {
     private String payloadType;
 
+    public DisruptorPayload(String payloadType)
+    {
+        this.payloadType = payloadType;
+    }
+
     public String getPayloadType()
     {
         return payloadType;
