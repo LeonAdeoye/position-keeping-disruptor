@@ -14,14 +14,6 @@ public class OutboundJournalEventHandler implements EventHandler<DisruptorEvent>
 
     public void onEvent(DisruptorEvent event, long sequence, boolean endOfBatch)
     {
-        ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
-        try
-        {
-            logger.info(mapper.writeValueAsString(event.getPayload()));
-        }
-        catch(JsonProcessingException jpe)
-        {
-            jpe.printStackTrace();
-        }
+        logger.debug(event.getPayload().toString());
     }
 }

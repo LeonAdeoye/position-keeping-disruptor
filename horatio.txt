@@ -1,5 +1,5 @@
 bufferSize=4096
 writerFilePath=resources/output.txt
-readerFilePath=horatio.txt
+readerFilePath=application.properties
 server.port=20010
 server.hostname=localhost

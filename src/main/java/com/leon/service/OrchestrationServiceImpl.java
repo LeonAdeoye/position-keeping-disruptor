@@ -44,11 +44,11 @@ public class OrchestrationServiceImpl implements OrchestrationService
     @Override
     public void stop()
     {
-        reader.close();
-        writer.close();
         businessLogicEventHandler.close();
         inboundDisruptor.stop();
         outboundDisruptor.stop();
+        reader.close();
+        writer.close();
         logger.info("Shutdown and cleanup completed.");
     }
 }

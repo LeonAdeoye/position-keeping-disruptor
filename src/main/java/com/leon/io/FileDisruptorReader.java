@@ -6,40 +6,73 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
+import java.io.*;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.stream.Stream;
 
 @Component
 public class FileDisruptorReader implements DisruptorReader
 {
     private static final Logger logger = LoggerFactory.getLogger(FileDisruptorReader.class);
     private String readerFilePath;
+    private BufferedReader reader;
 
     @Override
     public void initialize(ConfigurationServiceImpl configurationService)
     {
         this.readerFilePath = configurationService.getReaderFilePath();
+        try
+        {
+            reader = new BufferedReader(new FileReader(readerFilePath));
+        }
+        catch(IOException ioe)
+        {
+            logger.error("Failed to instantiate buffered reader for file name: " + readerFilePath + " due to exception: " + ioe.getLocalizedMessage());
+        }
     }
 
     @Override
     public Flux<DisruptorPayload> readAll()
     {
-        try (Stream<String> linesStream = Files.lines(Paths.get(ClassLoader.getSystemResource(this.readerFilePath).toURI())))
-        {
-            return Flux.fromStream(linesStream.map(DisruptorPayload::new));
-        }
-        catch(Exception ex)
-        {
-            logger.error("Failed to read file because of exception: " + ex);
+        if(reader == null)
             return Flux.empty();
+
+        Flux<DisruptorPayload> result = Flux.generate(() -> "", (state, sink) ->
+        {
+            String nextLine = this.readNext();
+            if(nextLine == null)
+                sink.complete();
+            else
+                sink.next(new DisruptorPayload(nextLine));
+            return state;
+        });
+        return result;
+    }
+
+    public String readNext()
+    {
+        try
+        {
+            if(reader != null)
+                return reader.readLine();
         }
+        catch(IOException ioe)
+        {
+            logger.error("Failed to read next line due to exception: " + ioe.getLocalizedMessage());;
+        }
+        return null;
     }
 
     @Override
     public void close()
     {
-
+        try
+        {
+            if(reader != null)
+                reader.close();
+        }
+        catch(IOException ioe)
+        {
+            logger.error("Failed to close buffered reader due to exception: " + ioe.getLocalizedMessage());
+        }
     }
 }
