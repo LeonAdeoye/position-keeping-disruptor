@@ -6,7 +6,7 @@ package com.leon.service;
 // The canonical example from LMAX is where we have three operations, journal writing (writing the input data to a persistent journal file),
 // replication (sending the input data to another machine to ensure that there is a remote copy of the data), and business logic (the real processing work).
 // 3 Event Handlers listening (JournalConsumer, ReplicationConsumer and ApplicationConsumer) to the Disruptor,
-// each of these Event Handlers will receive all of the messages available in the Disruptor (in the same order).
+// each of these Event Handlers will receive all messages available in the Disruptor (in the same order).
 
 import com.leon.handler.DisruptorEventProducer;
 import com.leon.model.DisruptorEvent;
@@ -23,8 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import com.lmax.disruptor.EventHandler;
-import java.time.Duration;
-import java.time.Instant;
 
 @Scope("prototype")
 @Service

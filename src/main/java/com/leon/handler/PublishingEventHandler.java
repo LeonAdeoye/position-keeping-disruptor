@@ -6,7 +6,6 @@ import com.lmax.disruptor.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.leon.model.DisruptorEvent;
-import org.springframework.beans.factory.annotation.Autowired;
 import reactor.core.publisher.Mono;
 
 public class PublishingEventHandler implements EventHandler<DisruptorEvent>

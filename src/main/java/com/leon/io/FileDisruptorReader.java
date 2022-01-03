@@ -4,36 +4,37 @@ import com.leon.model.DisruptorPayload;
 import com.leon.service.ConfigurationServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.stream.BaseStream;
+
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.stream.Stream;
 
 @Component
 public class FileDisruptorReader implements DisruptorReader
 {
     private static final Logger logger = LoggerFactory.getLogger(FileDisruptorReader.class);
-    private String readerFileName;
+    private String readerFilePath;
 
     @Override
     public void initialize(ConfigurationServiceImpl configurationService)
     {
-        this.readerFileName = configurationService.getReaderFileName();
+        this.readerFilePath = configurationService.getReaderFilePath();
     }
 
     @Override
     public Flux<DisruptorPayload> readAll()
     {
-        return Flux.empty();
-    }
-
-    @Override
-    public Mono<DisruptorPayload> read()
-    {
-        return Mono.just(new DisruptorPayload(""));
+        try (Stream<String> linesStream = Files.lines(Paths.get(ClassLoader.getSystemResource(this.readerFilePath).toURI())))
+        {
+            return Flux.fromStream(linesStream.map(DisruptorPayload::new));
+        }
+        catch(Exception ex)
+        {
+            logger.error("Failed to read file because of exception: " + ex);
+            return Flux.empty();
+        }
     }
 
     @Override

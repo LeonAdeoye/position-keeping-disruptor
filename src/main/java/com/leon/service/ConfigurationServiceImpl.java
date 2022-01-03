@@ -9,24 +9,24 @@ public class ConfigurationServiceImpl
     @Value("${bufferSize}")
     private int bufferSize;
 
-    @Value("${writerFileName}")
-    private String writerFileName;
+    @Value("${writerFilePath}")
+    private String writerFilePath;
 
-    @Value("${readerFileName}")
-    private String readerFileName;
+    @Value("${readerFilePath}")
+    private String readerFilePath;
 
     public int getBufferSize()
     {
         return this.bufferSize;
     }
 
-    public String getWriterFileName()
+    public String getWriterFilePath()
     {
-        return this.writerFileName;
+        return this.writerFilePath;
     }
 
-    public String getReaderFileName()
+    public String getReaderFilePath()
     {
-        return this.readerFileName;
+        return this.readerFilePath;
     }
 }

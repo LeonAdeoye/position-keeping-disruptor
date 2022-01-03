@@ -12,11 +12,12 @@ import reactor.core.publisher.Mono;
 public class FileDisruptorWriter implements DisruptorWriter
 {
     private static final Logger logger = LoggerFactory.getLogger(FileDisruptorWriter.class);
-    private String writerFileName;
+    private String writerFilePath;
+
     @Override
     public void initialize(ConfigurationServiceImpl configurationService)
     {
-        this.writerFileName = configurationService.getWriterFileName();
+        this.writerFilePath = configurationService.getWriterFilePath();
     }
 
     @Override
