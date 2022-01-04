@@ -20,11 +20,11 @@ public class PublishingEventHandler implements EventHandler<DisruptorEvent>
 
     public void onEvent(DisruptorEvent event, long sequence, boolean endOfBatch)
     {
-        DisruptorPayload payLoad = event.getPayload();
-        if(payLoad != null)
+        DisruptorPayload payload = event.getPayload();
+        if(payload != null)
         {
-            logger.debug(payLoad.toString());
-            writer.write(Mono.just(payLoad));
+            logger.debug(payload.toString());
+            writer.write(Mono.just(payload));
         }
     }
 }

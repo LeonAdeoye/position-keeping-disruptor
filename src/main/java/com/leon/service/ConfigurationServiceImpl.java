@@ -17,16 +17,16 @@ public class ConfigurationServiceImpl
 
     public int getBufferSize()
     {
-        return this.bufferSize;
+        return bufferSize;
     }
 
     public String getWriterFilePath()
     {
-        return this.writerFilePath;
+        return writerFilePath;
     }
 
     public String getReaderFilePath()
     {
-        return this.readerFilePath;
+        return readerFilePath;
     }
 }

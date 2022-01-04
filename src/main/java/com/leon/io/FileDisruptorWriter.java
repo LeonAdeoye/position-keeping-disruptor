@@ -17,7 +17,7 @@ public class FileDisruptorWriter implements DisruptorWriter
     @Override
     public void initialize(ConfigurationServiceImpl configurationService)
     {
-        this.writerFilePath = configurationService.getWriterFilePath();
+        writerFilePath = configurationService.getWriterFilePath();
     }
 
     @Override

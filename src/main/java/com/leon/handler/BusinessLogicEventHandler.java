@@ -38,14 +38,13 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
             persistedDisruptorMap = ChronicleMap
                 .of(LongValue.class, CharSequence.class)
                 .name("disruptor-map")
-                .entries(1_000_000)
+                .entries(1_000)
                 .averageValue("America")
                 .createPersistedTo(new File("../logs/disruptor-processed.txt"));
 
             LongValue qatarKey = Values.newHeapInstance(LongValue.class);
             qatarKey.setValue(1);
             CharSequence country = persistedDisruptorMap.get(qatarKey);
-            System.out.println("Country: " + country.toString());
             logger.info("Created chronicle map.");
         }
         catch(IOException ioe)
@@ -53,7 +52,7 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
             logger.error(ioe.getMessage());
         }
 
-        this.outboundDisruptor = outboundDisruptor;
+        outboundDisruptor = outboundDisruptor;
     }
 
     public void onEvent(DisruptorEvent event, long sequence, boolean endOfBatch)

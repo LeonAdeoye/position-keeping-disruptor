@@ -42,24 +42,24 @@ public class DisruptorServiceImpl implements DisruptorService
     public void start(String name, EventHandler<DisruptorEvent> journalHandler, EventHandler<DisruptorEvent> actionEventHandler)
     {
         this.name = name;
-        this.counter = 0;
+        counter = 0;
         // The factory for the event
         DisruptorEventFactory factory = new DisruptorEventFactory();
 
         // Construct the Disruptor
-        this.disruptor = new Disruptor<DisruptorEvent>(factory, configurationService.getBufferSize(),
+        disruptor = new Disruptor<DisruptorEvent>(factory, configurationService.getBufferSize(),
                 DaemonThreadFactory.INSTANCE, ProducerType.SINGLE, new BlockingWaitStrategy());
         logger.info("Created " + name + " disruptor.");
 
-        this.disruptor.handleEventsWith(journalHandler).then(actionEventHandler);
+        disruptor.handleEventsWith(journalHandler).then(actionEventHandler);
 
         // Start the Disruptor, starts all threads running
-        this.disruptor.start();
+        disruptor.start();
         logger.info("Started " + name + " disruptor.");
 
         // Get the ring buffer from the Disruptor to be used for publishing.
         RingBuffer<DisruptorEvent> ringBuffer = disruptor.getRingBuffer();
-        this.producer = new DisruptorEventProducer(ringBuffer);
+        producer = new DisruptorEventProducer(ringBuffer);
         logger.info("Instantiated producer for " + name + " disruptor.");
     }
 
@@ -67,16 +67,16 @@ public class DisruptorServiceImpl implements DisruptorService
     public void stop()
     {
         logger.info(counter + " events were processed by " + name + " disruptor");
-        this.disruptor.halt();
+        disruptor.halt();
         logger.info("Halted " + name + " disruptor");
-        this.disruptor.shutdown();
+        disruptor.shutdown();
         logger.info("Shutdown " + name + " disruptor");
     }
 
     @Override
     public void push(DisruptorPayload payLoad)
     {
-        this.producer.onData(payLoad);
-        this.counter++;
+        producer.onData(payLoad);
+        counter++;
     }
 }
