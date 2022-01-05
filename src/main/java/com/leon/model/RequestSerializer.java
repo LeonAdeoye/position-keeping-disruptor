@@ -36,7 +36,8 @@ public final class RequestSerializer implements SizedReader<Request>, SizedWrite
     @Override
     public long size(@NotNull Request toWrite)
     {
-        return 0;
+        // TODO add 4 string fields
+        return Character.BYTES + Long.BYTES + Integer.BYTES + Integer.BYTES;
     }
 
     @Override
