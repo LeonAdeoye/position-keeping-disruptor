@@ -25,6 +25,11 @@ public class Request
         this.requestSubType = requestSubType;
     }
 
+    public Request()
+    {
+
+    }
+
     public char getSide()
     {
         return side;
