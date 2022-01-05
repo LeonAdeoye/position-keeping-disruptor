@@ -3,7 +3,7 @@ package com.leon.handler;
 import com.leon.service.DisruptorService;
 import com.lmax.disruptor.EventHandler;
 import net.openhft.chronicle.core.values.LongValue;
-import net.openhft.chronicle.map.ChronicleMap;
+import net.openhft.chronicle.map.*;
 import net.openhft.chronicle.values.Values;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +35,7 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
     {
         try
         {
-            persistedDisruptorMap = ChronicleMap
+            persistedDisruptorMap = ChronicleMapBuilder
                 .of(LongValue.class, CharSequence.class)
                 .name("disruptor-map")
                 .entries(1_000)
