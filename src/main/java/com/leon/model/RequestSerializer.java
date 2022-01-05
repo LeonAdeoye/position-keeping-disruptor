@@ -23,6 +23,8 @@ public final class RequestSerializer implements SizedReader<Request>, SizedWrite
 
         using.setSide(in.readChar());
         using.setQuantity(in.readLong());
+        using.setStockCode(in.readUtf8());
+        using.setClientCode(in.readChar());
         return using;
     }
 
