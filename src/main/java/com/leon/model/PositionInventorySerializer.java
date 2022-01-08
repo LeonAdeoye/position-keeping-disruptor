@@ -37,7 +37,7 @@ public class PositionInventorySerializer implements SizedReader<PositionInventor
 	@Override
 	public long size(@NotNull PositionInventory toWrite)
 	{
-		return Integer.BYTES + Integer.BYTES + Integer.BYTES + Integer.BYTES + Integer.BYTES
+		return Integer.BYTES + (Byte.BYTES * toWrite.getStockCode().length()) +Integer.BYTES + Integer.BYTES + Integer.BYTES + Integer.BYTES
 				+ Double.BYTES + Double.BYTES + Double.BYTES;
 	}
 

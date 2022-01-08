@@ -5,15 +5,12 @@ import com.leon.model.PositionInventory;
 import com.leon.service.DisruptorService;
 import com.lmax.disruptor.EventHandler;
 import net.openhft.chronicle.map.ChronicleMap;
-import net.openhft.chronicle.map.ChronicleMapBuilder;
-import net.openhft.chronicle.values.Values;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -61,10 +58,12 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
             JSONArray positionInventories = (JSONArray) obj;
             positionInventories.forEach( positionInventory ->
             {
-                String key = Values.newHeapInstance(String.class);
-                key = String.format("%06d%s", 1, "0001.HK");
-                persistedDisruptorMap.put(key, (PositionInventory) positionInventory);
-                logger.info("Loaded Chrionicle map with " + positionInventories.size() + " inventory positions.");
+                System.out.println(positionInventory.toString());
+                System.out.println(String.format("key: %06d%s", positionInventory, "0001.HK"));
+
+                // persistedDisruptorMap.put(key, (PositionInventory) positionInventory);
+                // System.out.println(persistedDisruptorMap.get(key).toString());
+                //logger.info("Loaded Chrionicle map with " + positionInventories.size() + " inventory positions.");
             });
         }
         catch (FileNotFoundException e)
@@ -83,20 +82,20 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
 
     private void initializeChronicleMap()
     {
-        try
-        {
-            persistedDisruptorMap = ChronicleMapBuilder
-                    .of(String.class, PositionInventory.class)
-                    .name("disruptor-map")
-                    .entries(1_000_000)
-                    .averageKey("America")
-                    .averageValue(new PositionInventory())
-                    .createPersistedTo(new File("../logs/position-inventory.txt"));
-        }
-        catch(IOException ioe)
-        {
-            logger.error(ioe.getMessage());
-        }
+//        try
+//        {
+//            persistedDisruptorMap = ChronicleMapBuilder
+//                    .of(String.class, PositionInventory.class)
+//                    .name("disruptor-map")
+//                    .entries(1_000_000)
+//                    .averageKey("America")
+//                    .averageValue(new PositionInventory())
+//                    .createPersistedTo(new File("../logs/position-inventory.txt"));
+//        }
+//        catch(IOException ioe)
+//        {
+//            logger.error(ioe.getMessage());
+//        }
     }
 
     public void close()
