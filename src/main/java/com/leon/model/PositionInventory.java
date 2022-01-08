@@ -1,17 +1,28 @@
 package com.leon.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Objects;
 
 public class PositionInventory
 {
+	@JsonProperty("clientId")
 	private int clientId;
+	@JsonProperty("stockCode")
 	private String stockCode;
+	@JsonProperty("startOfDayQuantity")
 	private int startOfDayQuantity;
+	@JsonProperty("executedQuantity")
 	private int executedQuantity;
+	@JsonProperty("reservedQuantity")
 	private int reservedQuantity;
+	@JsonProperty("borrowedQuantity")
 	private int borrowedQuantity;
+	@JsonProperty("startOfDayCash")
 	private double startOfDayCash;
+	@JsonProperty("executedCash")
 	private double executedCash;
+	@JsonProperty("reservedCash")
 	private double reservedCash;
 
 	public PositionInventory(int clientId, String stockCode, int startOfDayQuantity, int executedQuantity, int reservedQuantity, int borrowedQuantity, double startOfDayCash, double executedCash, double reservedCash)

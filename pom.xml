@@ -15,6 +15,8 @@
         <chronicle.version>3.21.86</chronicle.version>
         <reactor-core.version>3.3.9.RELEASE</reactor-core.version>
         <lmax-disruptor.version>3.4.4</lmax-disruptor.version>
+        <lmax-disruptor.version>3.4.4</lmax-disruptor.version>
+        <json-simple.version>1.1.1</json-simple.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -35,6 +37,11 @@
     </parent>
 
     <dependencies>
+        <dependency>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>${json-simple.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>

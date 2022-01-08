@@ -1,15 +1,21 @@
 package com.leon.handler;
 
+import com.leon.model.DisruptorEvent;
+import com.leon.model.PositionInventory;
 import com.leon.service.DisruptorService;
 import com.lmax.disruptor.EventHandler;
-import net.openhft.chronicle.core.values.LongValue;
-import net.openhft.chronicle.map.*;
+import net.openhft.chronicle.map.ChronicleMap;
+import net.openhft.chronicle.map.ChronicleMapBuilder;
 import net.openhft.chronicle.values.Values;
+import org.json.simple.JSONArray;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.leon.model.DisruptorEvent;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 
 /*
@@ -29,29 +35,12 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
 {
     private static final Logger logger = LoggerFactory.getLogger(BusinessLogicEventHandler.class);
     private DisruptorService outboundDisruptor;
-    private  ChronicleMap<LongValue, CharSequence> persistedDisruptorMap;
+    private  ChronicleMap<String, PositionInventory> persistedDisruptorMap;
 
-    public BusinessLogicEventHandler(DisruptorService outboundDisruptor)
+    public BusinessLogicEventHandler(DisruptorService outboundDisruptor, String startOfDayInventoryPositionFilePath)
     {
-        try
-        {
-            persistedDisruptorMap = ChronicleMapBuilder
-                .of(LongValue.class, CharSequence.class)
-                .name("disruptor-map")
-                .entries(1_000)
-                .averageValue("America")
-                .createPersistedTo(new File("../logs/disruptor-processed.txt"));
-
-            LongValue qatarKey = Values.newHeapInstance(LongValue.class);
-            qatarKey.setValue(1);
-            CharSequence country = persistedDisruptorMap.get(qatarKey);
-            logger.info("Created chronicle map.");
-        }
-        catch(IOException ioe)
-        {
-            logger.error(ioe.getMessage());
-        }
-
+        initializeChronicleMap();
+        uploadSODPositions(startOfDayInventoryPositionFilePath);
         outboundDisruptor = outboundDisruptor;
     }
 
@@ -59,6 +48,55 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
     {
         logger.debug(event.getPayload().toString());
         outboundDisruptor.push(event.getPayload());
+    }
+
+    public void uploadSODPositions(String startOfDayInventoryPositionFilePath)
+    {
+        //JSON parser object to parse read file
+        JSONParser jsonParser = new JSONParser();
+
+        try (FileReader reader = new FileReader(startOfDayInventoryPositionFilePath))
+        {
+            Object obj = jsonParser.parse(reader);
+            JSONArray positionInventories = (JSONArray) obj;
+            positionInventories.forEach( positionInventory ->
+            {
+                String key = Values.newHeapInstance(String.class);
+                key = String.format("%06d%s", 1, "0001.HK");
+                persistedDisruptorMap.put(key, (PositionInventory) positionInventory);
+                logger.info("Loaded Chrionicle map with " + positionInventories.size() + " inventory positions.");
+            });
+        }
+        catch (FileNotFoundException e)
+        {
+            e.printStackTrace();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        catch (ParseException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    private void initializeChronicleMap()
+    {
+        try
+        {
+            persistedDisruptorMap = ChronicleMapBuilder
+                    .of(String.class, PositionInventory.class)
+                    .name("disruptor-map")
+                    .entries(1_000_000)
+                    .averageKey("America")
+                    .averageValue(new PositionInventory())
+                    .createPersistedTo(new File("../logs/position-inventory.txt"));
+        }
+        catch(IOException ioe)
+        {
+            logger.error(ioe.getMessage());
+        }
     }
 
     public void close()

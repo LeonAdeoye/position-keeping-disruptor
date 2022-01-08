@@ -1,16 +1,27 @@
 package com.leon.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 
+@JsonIgnoreProperties
 public class Request
 {
+    @JsonProperty("side")
     private char side;
+    @JsonProperty("quantity")
     private long quantity;
+    @JsonProperty("stockCode")
     private String stockCode;
+    @JsonProperty("clientCode")
     private int clientCode;
+    @JsonProperty("orderId")
     private String orderId;
+    @JsonProperty("sequenceId")
     private int sequenceId;
+    @JsonProperty("requestType")
     private String requestType;
+    @JsonProperty("requestSubType")
     private String requestSubType;
 
     public Request(char side, long quantity, String stockCode, int clientCode, String orderId, int sequenceId, String requestType, String requestSubType)

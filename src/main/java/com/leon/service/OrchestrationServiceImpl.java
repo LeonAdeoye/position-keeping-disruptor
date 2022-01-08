@@ -1,8 +1,8 @@
 package com.leon.service;
 
+import com.leon.handler.BusinessLogicEventHandler;
 import com.leon.handler.InboundJournalEventHandler;
 import com.leon.handler.OutboundJournalEventHandler;
-import com.leon.handler.BusinessLogicEventHandler;
 import com.leon.handler.PublishingEventHandler;
 import com.leon.io.DisruptorReader;
 import com.leon.io.DisruptorWriter;
@@ -23,22 +23,21 @@ public class OrchestrationServiceImpl implements OrchestrationService
     @Autowired
     private ConfigurationServiceImpl configurationService;
     @Autowired
-    private DisruptorReader reader;
+    private DisruptorReader requestReader;
     @Autowired
-    private DisruptorWriter writer;
-
+    private DisruptorWriter responseWriter;
     private BusinessLogicEventHandler businessLogicEventHandler;
 
     @Override
     public void start()
     {
-        reader.initialize(configurationService);
-        writer.initialize(configurationService);
+        requestReader.initialize(configurationService.getReaderFilePath());
+        responseWriter.initialize(configurationService);
         logger.info("Initialized reader and writer.");
-        businessLogicEventHandler = new BusinessLogicEventHandler(outboundDisruptor);
+        businessLogicEventHandler = new BusinessLogicEventHandler(outboundDisruptor, configurationService.getStartOfDayInventoryPositionFilePath());
         inboundDisruptor.start("INBOUND", new InboundJournalEventHandler(), businessLogicEventHandler);
-        outboundDisruptor.start("OUTBOUND", new OutboundJournalEventHandler(), new PublishingEventHandler(writer) );
-        reader.readAll().subscribe((request) -> inboundDisruptor.push(request));
+        outboundDisruptor.start("OUTBOUND", new OutboundJournalEventHandler(), new PublishingEventHandler(responseWriter) );
+        requestReader.readAll().subscribe((request) -> inboundDisruptor.push(request));
     }
 
     @Override
@@ -47,8 +46,8 @@ public class OrchestrationServiceImpl implements OrchestrationService
         businessLogicEventHandler.close();
         inboundDisruptor.stop();
         outboundDisruptor.stop();
-        reader.close();
-        writer.close();
+        requestReader.close();
+        responseWriter.close();
         logger.info("Shutdown and cleanup completed.");
     }
 }

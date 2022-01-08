@@ -15,6 +15,9 @@ public class ConfigurationServiceImpl
     @Value("${readerFilePath}")
     private String readerFilePath;
 
+    @Value("${startOfDayInventoryPositionFilePath}")
+    private String startOfDayInventoryPositionFilePath;
+
     public int getBufferSize()
     {
         return bufferSize;
@@ -29,4 +32,6 @@ public class ConfigurationServiceImpl
     {
         return readerFilePath;
     }
+
+    public String getStartOfDayInventoryPositionFilePath() { return startOfDayInventoryPositionFilePath; }
 }
