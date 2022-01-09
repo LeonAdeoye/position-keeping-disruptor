@@ -9,7 +9,7 @@ public class PositionInventory
 	@JsonProperty("clientId")
 	private int clientId;
 	@JsonProperty("stockCode")
-	private int stockCode;
+	private String stockCode;
 	@JsonProperty("startOfDayQuantity")
 	private int startOfDayQuantity;
 	@JsonProperty("executedQuantity")
@@ -25,7 +25,7 @@ public class PositionInventory
 	@JsonProperty("reservedCash")
 	private double reservedCash;
 
-	public PositionInventory(int clientId, int stockCode, int startOfDayQuantity, int executedQuantity, int reservedQuantity, int borrowedQuantity, double startOfDayCash, double executedCash, double reservedCash)
+	public PositionInventory(int clientId, String stockCode, int startOfDayQuantity, int executedQuantity, int reservedQuantity, int borrowedQuantity, double startOfDayCash, double executedCash, double reservedCash)
 	{
 		this.clientId = clientId;
 		this.stockCode = stockCode;
@@ -52,12 +52,12 @@ public class PositionInventory
 		this.clientId = clientId;
 	}
 
-	public int getStockCode()
+	public String getStockCode()
 	{
 		return stockCode;
 	}
 
-	public void setStockCode(int stockCode)
+	public void setStockCode(String stockCode)
 	{
 		this.stockCode = stockCode;
 	}

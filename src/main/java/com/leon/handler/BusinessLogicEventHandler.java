@@ -11,7 +11,6 @@ import net.openhft.chronicle.map.ChronicleMap;
 import net.openhft.chronicle.map.ChronicleMapBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -45,7 +44,7 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
                     new TypeReference<List<PositionInventory>>(){});
 
             positionInventories.forEach(positionInventory ->
-                    persistedDisruptorMap.put(String.format("%05d%05d", positionInventory.getClientId(), positionInventory.getStockCode()), positionInventory));
+                    persistedDisruptorMap.put(String.format("%05d%s", positionInventory.getClientId(), positionInventory.getStockCode()), positionInventory));
 
             logger.info("Loaded Chronicle map with " + positionInventories.size() + " inventory positions.");
         }
