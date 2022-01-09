@@ -22,7 +22,7 @@ public class PositionInventorySerializer implements SizedReader<PositionInventor
 			using = new PositionInventory();
 
 		using.setClientId(in.readInt());
-		using.setStockCode(in.readUtf8());
+		using.setStockCode(in.readInt());
 		using.setStartOfDayQuantity(in.readInt());
 		using.setExecutedQuantity(in.readInt());
 		using.setReservedQuantity(in.readInt());
@@ -37,7 +37,7 @@ public class PositionInventorySerializer implements SizedReader<PositionInventor
 	@Override
 	public long size(@NotNull PositionInventory toWrite)
 	{
-		return Integer.BYTES + (Byte.BYTES * toWrite.getStockCode().length()) +Integer.BYTES + Integer.BYTES + Integer.BYTES + Integer.BYTES
+		return Integer.BYTES + Integer.BYTES + Integer.BYTES + Integer.BYTES + Integer.BYTES + Integer.BYTES
 				+ Double.BYTES + Double.BYTES + Double.BYTES;
 	}
 
@@ -45,7 +45,7 @@ public class PositionInventorySerializer implements SizedReader<PositionInventor
 	public void write(Bytes out, long size, @NotNull PositionInventory toWrite)
 	{
 		out.writeInt(toWrite.getClientId());
-		out.writeUtf8(toWrite.getStockCode());
+		out.writeInt(toWrite.getStockCode());
 		out.writeInt(toWrite.getStartOfDayQuantity());
 		out.writeInt(toWrite.getExecutedQuantity());
 		out.writeInt(toWrite.getReservedQuantity());

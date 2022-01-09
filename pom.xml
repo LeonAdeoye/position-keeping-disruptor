@@ -10,13 +10,12 @@
     <properties>
         <logback.version>1.2.3</logback.version>
         <slf4j.version>1.7.31</slf4j.version>
-        <jackson.version>2.12.3</jackson.version>
+        <jackson.version>2.13.1</jackson.version>
         <java.version>1.8</java.version>
         <chronicle.version>3.21.86</chronicle.version>
         <reactor-core.version>3.3.9.RELEASE</reactor-core.version>
         <lmax-disruptor.version>3.4.4</lmax-disruptor.version>
         <lmax-disruptor.version>3.4.4</lmax-disruptor.version>
-        <json-simple.version>1.1.1</json-simple.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -37,11 +36,6 @@
     </parent>
 
     <dependencies>
-        <dependency>
-            <groupId>com.googlecode.json-simple</groupId>
-            <artifactId>json-simple</artifactId>
-            <version>${json-simple.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -80,8 +74,13 @@
             <version>${jackson.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jsr310</artifactId>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
             <version>${jackson.version}</version>
         </dependency>
         <dependency>

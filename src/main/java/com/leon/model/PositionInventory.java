@@ -9,7 +9,7 @@ public class PositionInventory
 	@JsonProperty("clientId")
 	private int clientId;
 	@JsonProperty("stockCode")
-	private String stockCode;
+	private int stockCode;
 	@JsonProperty("startOfDayQuantity")
 	private int startOfDayQuantity;
 	@JsonProperty("executedQuantity")
@@ -25,7 +25,7 @@ public class PositionInventory
 	@JsonProperty("reservedCash")
 	private double reservedCash;
 
-	public PositionInventory(int clientId, String stockCode, int startOfDayQuantity, int executedQuantity, int reservedQuantity, int borrowedQuantity, double startOfDayCash, double executedCash, double reservedCash)
+	public PositionInventory(int clientId, int stockCode, int startOfDayQuantity, int executedQuantity, int reservedQuantity, int borrowedQuantity, double startOfDayCash, double executedCash, double reservedCash)
 	{
 		this.clientId = clientId;
 		this.stockCode = stockCode;
@@ -52,12 +52,12 @@ public class PositionInventory
 		this.clientId = clientId;
 	}
 
-	public String getStockCode()
+	public int getStockCode()
 	{
 		return stockCode;
 	}
 
-	public void setStockCode(String stockCode)
+	public void setStockCode(int stockCode)
 	{
 		this.stockCode = stockCode;
 	}
@@ -138,7 +138,7 @@ public class PositionInventory
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		PositionInventory that = (PositionInventory) o;
-		return getClientId() == that.getClientId() && getStartOfDayQuantity() == that.getStartOfDayQuantity() && getExecutedQuantity() == that.getExecutedQuantity() && getReservedQuantity() == that.getReservedQuantity() && getBorrowedQuantity() == that.getBorrowedQuantity() && Double.compare(that.getStartOfDayCash(), getStartOfDayCash()) == 0 && Double.compare(that.getExecutedCash(), getExecutedCash()) == 0 && Double.compare(that.getReservedCash(), getReservedCash()) == 0 && getStockCode().equals(that.getStockCode());
+		return getClientId() == that.getClientId() && getStartOfDayQuantity() == that.getStartOfDayQuantity() && getExecutedQuantity() == that.getExecutedQuantity() && getReservedQuantity() == that.getReservedQuantity() && getBorrowedQuantity() == that.getBorrowedQuantity() && Double.compare(that.getStartOfDayCash(), getStartOfDayCash()) == 0 && Double.compare(that.getExecutedCash(), getExecutedCash()) == 0 && Double.compare(that.getReservedCash(), getReservedCash()) == 0 && getStockCode() == (that.getStockCode());
 	}
 
 	@Override
