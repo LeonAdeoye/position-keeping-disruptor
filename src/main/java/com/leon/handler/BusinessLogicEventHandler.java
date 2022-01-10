@@ -22,10 +22,9 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
     private DisruptorService outboundDisruptor;
     private  ChronicleMap<String, PositionInventory> persistedDisruptorMap;
 
-    public BusinessLogicEventHandler(DisruptorService outboundDisruptor, String startOfDayInventoryPositionFilePath)
+    public BusinessLogicEventHandler(DisruptorService outboundDisruptor)
     {
         initializeChronicleMap();
-        uploadSODPositions(startOfDayInventoryPositionFilePath);
         this.outboundDisruptor = outboundDisruptor;
     }
 
@@ -38,6 +37,13 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
     {
         try
         {
+            int size = persistedDisruptorMap.size();
+            if(size > 0)
+            {
+                persistedDisruptorMap.clear();
+                logger.info("Cleared the chronicle map of " + size + " inventory positions.");
+            }
+
             final ObjectMapper objectMapper = new ObjectMapper();
             List<PositionInventory> positionInventories = objectMapper.readValue(
                     new File(startOfDayInventoryPositionFilePath),
@@ -70,6 +76,8 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
                     .valueMarshaller(PositionInventorySerializer.getInstance())
                     .averageKey("00000100001") //TODO convert to Bloomberg code
                     .createPersistedTo(new File("../logs/position-inventory.txt"));
+
+            logger.info("Created the chronicle map with " + persistedDisruptorMap.size() + " inventory positions.");
         }
         catch(IOException ioe)
         {

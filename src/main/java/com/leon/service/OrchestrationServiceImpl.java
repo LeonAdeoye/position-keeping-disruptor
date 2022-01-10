@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
+
 @Service
 public class OrchestrationServiceImpl implements OrchestrationService
 {
@@ -28,26 +30,58 @@ public class OrchestrationServiceImpl implements OrchestrationService
     private DisruptorWriter responseWriter;
     private BusinessLogicEventHandler businessLogicEventHandler;
 
+    boolean started = false;
+    boolean stopped = false;
+
+    @PostConstruct
+    public void initialization()
+    {
+        businessLogicEventHandler = new BusinessLogicEventHandler(outboundDisruptor);
+        logger.info("Initialization completed.");
+    }
+
     @Override
     public void start()
     {
-        requestReader.initialize(configurationService.getReaderFilePath());
-        responseWriter.initialize(configurationService);
-        logger.info("Initialized reader and writer.");
-        businessLogicEventHandler = new BusinessLogicEventHandler(outboundDisruptor, configurationService.getStartOfDayInventoryPositionFilePath());
-        inboundDisruptor.start("INBOUND", new InboundJournalEventHandler(), businessLogicEventHandler);
-        outboundDisruptor.start("OUTBOUND", new OutboundJournalEventHandler(), new PublishingEventHandler(responseWriter) );
-        requestReader.readAll().subscribe((request) -> inboundDisruptor.push(request));
+        if(!started)
+        {
+            requestReader.initialize(configurationService.getReaderFilePath());
+            responseWriter.initialize(configurationService);
+            inboundDisruptor.start("INBOUND", new InboundJournalEventHandler(), businessLogicEventHandler);
+            outboundDisruptor.start("OUTBOUND", new OutboundJournalEventHandler(), new PublishingEventHandler(responseWriter) );
+            requestReader.readAll().subscribe((request) -> inboundDisruptor.push(request));
+            started = true;
+            stopped = false;
+            logger.info("Starting of disruptors completed.");
+        }
+        else
+            logger.error("Cannot start components because they have already been started.");
     }
 
     @Override
     public void stop()
     {
-        businessLogicEventHandler.close();
-        inboundDisruptor.stop();
-        outboundDisruptor.stop();
-        requestReader.close();
-        responseWriter.close();
-        logger.info("Shutdown and cleanup completed.");
+        if(!stopped)
+        {
+            businessLogicEventHandler.close();
+            inboundDisruptor.stop();
+            outboundDisruptor.stop();
+            requestReader.close();
+            responseWriter.close();
+            started = false;
+            stopped = true;
+            logger.info("Shutdown and cleanup completed.");
+        }
+        else
+            logger.error("Cannot stop components because they have already been stopped.");
+    }
+
+    @Override
+    public void upload(String sodFilePath)
+    {
+        if(businessLogicEventHandler != null && !started && !stopped)
+            businessLogicEventHandler.uploadSODPositions(sodFilePath);
+        else
+            logger.error("Upload cannot run when orchestration service is in an invalid state.");
     }
 }

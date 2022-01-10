@@ -4,4 +4,5 @@ public interface OrchestrationService
 {
     void start();
     void stop();
+    void upload(String filePath);
 }
