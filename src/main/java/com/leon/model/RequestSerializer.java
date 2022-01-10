@@ -6,7 +6,7 @@ import net.openhft.chronicle.hash.serialization.SizedWriter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public final class RequestSerializer implements SizedReader<Request>, SizedWriter<Request>
+public final class RequestSerializer implements SizedReader<InventoryCheckRequest>, SizedWriter<InventoryCheckRequest>
 {
     private static RequestSerializer INSTANCE = new RequestSerializer();
 
@@ -16,10 +16,10 @@ public final class RequestSerializer implements SizedReader<Request>, SizedWrite
 
     @NotNull
     @Override
-    public Request read(Bytes in, long size, @Nullable Request using)
+    public InventoryCheckRequest read(Bytes in, long size, @Nullable InventoryCheckRequest using)
     {
         if (using == null)
-            using = new Request();
+            using = new InventoryCheckRequest();
 
         using.setSide(in.readChar());
         using.setQuantity(in.readLong());
@@ -34,14 +34,14 @@ public final class RequestSerializer implements SizedReader<Request>, SizedWrite
     }
 
     @Override
-    public long size(@NotNull Request toWrite)
+    public long size(@NotNull InventoryCheckRequest toWrite)
     {
         // TODO add 4 string fields
         return Character.BYTES + Long.BYTES + Integer.BYTES + Integer.BYTES;
     }
 
     @Override
-    public void write(Bytes out, long size, @NotNull Request toWrite)
+    public void write(Bytes out, long size, @NotNull InventoryCheckRequest toWrite)
     {
         out.writeChar(toWrite.getSide());
         out.writeLong(toWrite.getQuantity());

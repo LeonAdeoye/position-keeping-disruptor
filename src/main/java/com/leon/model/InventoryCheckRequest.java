@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 
 @JsonIgnoreProperties
-public class Request
+public class InventoryCheckRequest
 {
     @JsonProperty("side")
     private char side;
@@ -24,7 +24,7 @@ public class Request
     @JsonProperty("requestSubType")
     private String requestSubType;
 
-    public Request(char side, long quantity, String stockCode, int clientCode, String orderId, int sequenceId, String requestType, String requestSubType)
+    public InventoryCheckRequest(char side, long quantity, String stockCode, int clientCode, String orderId, int sequenceId, String requestType, String requestSubType)
     {
         this.side = side;
         this.quantity = quantity;
@@ -36,7 +36,7 @@ public class Request
         this.requestSubType = requestSubType;
     }
 
-    public Request()
+    public InventoryCheckRequest()
     {
 
     }
@@ -125,7 +125,7 @@ public class Request
     {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Request request = (Request) o;
+        InventoryCheckRequest request = (InventoryCheckRequest) o;
         return getSide() == request.getSide() && getQuantity() == request.getQuantity() && getClientCode() == request.getClientCode()
                 && getSequenceId() == request.getSequenceId() && getStockCode().equals(request.getStockCode()) && Objects.equals(getOrderId(), request.getOrderId())
                 && getRequestType().equals(request.getRequestType()) && Objects.equals(getRequestSubType(), request.getRequestSubType());
