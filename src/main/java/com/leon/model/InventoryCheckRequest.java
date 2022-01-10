@@ -21,10 +21,7 @@ public class InventoryCheckRequest
     private int sequenceId;
     @JsonProperty("requestType")
     private String requestType;
-    @JsonProperty("requestSubType")
-    private String requestSubType;
-
-    public InventoryCheckRequest(char side, long quantity, String stockCode, int clientCode, String orderId, int sequenceId, String requestType, String requestSubType)
+    public InventoryCheckRequest(char side, long quantity, String stockCode, int clientCode, String orderId, int sequenceId, String requestType)
     {
         this.side = side;
         this.quantity = quantity;
@@ -33,7 +30,6 @@ public class InventoryCheckRequest
         this.orderId = orderId;
         this.sequenceId = sequenceId;
         this.requestType = requestType;
-        this.requestSubType = requestSubType;
     }
 
     public InventoryCheckRequest()
@@ -110,16 +106,6 @@ public class InventoryCheckRequest
         this.requestType = requestType;
     }
 
-    public String getRequestSubType()
-    {
-        return requestSubType;
-    }
-
-    public void setRequestSubType(String requestSubType)
-    {
-        this.requestSubType = requestSubType;
-    }
-
     @Override
     public boolean equals(Object o)
     {
@@ -128,13 +114,13 @@ public class InventoryCheckRequest
         InventoryCheckRequest request = (InventoryCheckRequest) o;
         return getSide() == request.getSide() && getQuantity() == request.getQuantity() && getClientCode() == request.getClientCode()
                 && getSequenceId() == request.getSequenceId() && getStockCode().equals(request.getStockCode()) && Objects.equals(getOrderId(), request.getOrderId())
-                && getRequestType().equals(request.getRequestType()) && Objects.equals(getRequestSubType(), request.getRequestSubType());
+                && getRequestType().equals(request.getRequestType());
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hash(getSide(), getQuantity(), getStockCode(), getClientCode(), getOrderId(), getSequenceId(), getRequestType(), getRequestSubType());
+        return Objects.hash(getSide(), getQuantity(), getStockCode(), getClientCode(), getOrderId(), getSequenceId(), getRequestType());
     }
 
     @Override
@@ -148,7 +134,6 @@ public class InventoryCheckRequest
                 ", orderId='" + orderId + '\'' +
                 ", sequenceId=" + sequenceId +
                 ", requestType='" + requestType + '\'' +
-                ", requestSubType='" + requestSubType + '\'' +
                 '}';
     }
 }

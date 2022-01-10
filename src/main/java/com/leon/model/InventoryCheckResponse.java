@@ -14,9 +14,8 @@ public class InventoryCheckResponse
 	private double reservedCash;
 	private double outstandingCash;
 	private String requestType;
-	private String requestSubType;
 
-	public InventoryCheckResponse(int reservedQuantity, int outstandingQuantity, String result, String orderId, int clientId, String stockCode, char side, double reservedCash, double outstandingCash, String requestType, String requestSubType)
+	public InventoryCheckResponse(int reservedQuantity, int outstandingQuantity, String result, String orderId, int clientId, String stockCode, char side, double reservedCash, double outstandingCash, String requestType)
 	{
 		this.reservedQuantity = reservedQuantity;
 		this.outstandingQuantity = outstandingQuantity;
@@ -28,7 +27,6 @@ public class InventoryCheckResponse
 		this.reservedCash = reservedCash;
 		this.outstandingCash = outstandingCash;
 		this.requestType = requestType;
-		this.requestSubType = requestSubType;
 	}
 
 	public InventoryCheckResponse()	{}
@@ -133,20 +131,10 @@ public class InventoryCheckResponse
 		this.requestType = requestType;
 	}
 
-	public String getRequestSubType()
-	{
-		return requestSubType;
-	}
-
-	public void setRequestSubType(String requestSubType)
-	{
-		this.requestSubType = requestSubType;
-	}
-
 	@Override
 	public String toString()
 	{
-		return "InventoryCheckResponse{" + "reservedQuantity=" + reservedQuantity + ", outstandingQuantity=" + outstandingQuantity + ", result='" + result + '\'' + ", orderId='" + orderId + '\'' + ", clientId=" + clientId + ", stockCode='" + stockCode + '\'' + ", side=" + side + ", reservedCash=" + reservedCash + ", outstandingCash=" + outstandingCash + ", requestType='" + requestType + '\'' + ", requestSubType='" + requestSubType + '\'' + '}';
+		return "InventoryCheckResponse{" + "reservedQuantity=" + reservedQuantity + ", outstandingQuantity=" + outstandingQuantity + ", result='" + result + '\'' + ", orderId='" + orderId + '\'' + ", clientId=" + clientId + ", stockCode='" + stockCode + '\'' + ", side=" + side + ", reservedCash=" + reservedCash + ", outstandingCash=" + outstandingCash + ", requestType='" + requestType + '\'' + ", requestSubType='" + '}';
 	}
 
 	@Override
@@ -155,12 +143,12 @@ public class InventoryCheckResponse
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		InventoryCheckResponse that = (InventoryCheckResponse) o;
-		return getReservedQuantity() == that.getReservedQuantity() && getOutstandingQuantity() == that.getOutstandingQuantity() && getClientId() == that.getClientId() && getSide() == that.getSide() && Double.compare(that.getReservedCash(), getReservedCash()) == 0 && Double.compare(that.getOutstandingCash(), getOutstandingCash()) == 0 && getResult().equals(that.getResult()) && getOrderId().equals(that.getOrderId()) && getStockCode().equals(that.getStockCode()) && getRequestType().equals(that.getRequestType()) && getRequestSubType().equals(that.getRequestSubType());
+		return getReservedQuantity() == that.getReservedQuantity() && getOutstandingQuantity() == that.getOutstandingQuantity() && getClientId() == that.getClientId() && getSide() == that.getSide() && Double.compare(that.getReservedCash(), getReservedCash()) == 0 && Double.compare(that.getOutstandingCash(), getOutstandingCash()) == 0 && getResult().equals(that.getResult()) && getOrderId().equals(that.getOrderId()) && getStockCode().equals(that.getStockCode()) && getRequestType().equals(that.getRequestType());
 	}
 
 	@Override
 	public int hashCode()
 	{
-		return Objects.hash(getReservedQuantity(), getOutstandingQuantity(), getResult(), getOrderId(), getClientId(), getStockCode(), getSide(), getReservedCash(), getOutstandingCash(), getRequestType(), getRequestSubType());
+		return Objects.hash(getReservedQuantity(), getOutstandingQuantity(), getResult(), getOrderId(), getClientId(), getStockCode(), getSide(), getReservedCash(), getOutstandingCash(), getRequestType());
 	}
 }

@@ -31,6 +31,7 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
     public void onEvent(DisruptorEvent event, long sequence, boolean endOfBatch)
     {
         outboundDisruptor.push(event.getPayload());
+        logger.info("Processed: " + event.getPayload().toString());
     }
 
     public void uploadSODPositions(String startOfDayInventoryPositionFilePath)

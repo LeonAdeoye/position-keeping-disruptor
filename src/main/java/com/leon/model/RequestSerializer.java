@@ -28,7 +28,6 @@ public final class RequestSerializer implements SizedReader<InventoryCheckReques
         using.setOrderId(in.readUtf8());
         using.setSequenceId(in.readInt());
         using.setRequestType(in.readUtf8());
-        using.setRequestSubType(in.readUtf8());
 
         return using;
     }
@@ -37,7 +36,7 @@ public final class RequestSerializer implements SizedReader<InventoryCheckReques
     public long size(@NotNull InventoryCheckRequest toWrite)
     {
         // TODO add 4 string fields
-        return Character.BYTES + Long.BYTES + Integer.BYTES + Integer.BYTES;
+        return Character.BYTES + Long.BYTES + Integer.BYTES;
     }
 
     @Override
@@ -50,6 +49,5 @@ public final class RequestSerializer implements SizedReader<InventoryCheckReques
         out.writeUtf8(toWrite.getOrderId());
         out.writeInt(toWrite.getSequenceId());
         out.writeUtf8(toWrite.getRequestType());
-        out.writeUtf8(toWrite.getRequestSubType());
     }
 }

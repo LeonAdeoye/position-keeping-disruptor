@@ -41,7 +41,13 @@ public class FileDisruptorReader implements DisruptorReader
             if(nextLine == null)
                 sink.complete();
             else
-                sink.next(new DisruptorPayload(nextLine));
+            {
+                String[] splitInput  = nextLine.split("=");
+                if (splitInput.length == 2)
+                    sink.next(new DisruptorPayload(splitInput[0], splitInput[1]));
+                else
+                    logger.error("String not in correct format");
+            }
             return state;
         });
         return result;
