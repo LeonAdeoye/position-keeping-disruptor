@@ -2,15 +2,14 @@ package com.leon.handler;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.leon.model.DisruptorEvent;
-import com.leon.model.PositionInventory;
-import com.leon.model.PositionInventorySerializer;
+import com.leon.model.*;
 import com.leon.service.DisruptorService;
 import com.lmax.disruptor.EventHandler;
 import net.openhft.chronicle.map.ChronicleMap;
 import net.openhft.chronicle.map.ChronicleMapBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -30,8 +29,41 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
 
     public void onEvent(DisruptorEvent event, long sequence, boolean endOfBatch)
     {
-        outboundDisruptor.push(event.getPayload());
-        logger.info("Processed: " + event.getPayload().toString());
+        String result = "";
+        try
+        {
+            switch (RequestTypeEnum.valueOf(event.getPayload().getPayloadType()))
+            {
+                case CASH_CHECK_REQUEST_TYPE:
+                    result = processCashCheckRequest(MessageFactory.createCashCheckRequestMessage(event.getPayload().getPayload()));
+                    break;
+                case POSITION_CHECK_REQUEST_TYPE:
+                    result = processPositionCheckRequest(MessageFactory.createPositionCheckRequestMessage(event.getPayload().getPayload()));
+                    break;
+                case EXECUTION_MESSAGE_TYPE:
+                    result = processExecution(MessageFactory.createExecutionMessage(event.getPayload().getPayload()));
+            }
+        }
+        catch(IllegalArgumentException e)
+        {
+            logger.error("Event ignored because cannot convert " + event.getPayload().getPayloadType() + " to RequestTypeEnum. Exception thrown: " + e.getMessage());
+        }
+        outboundDisruptor.push(new DisruptorPayload("RESPONSE", result)); // TODO
+    }
+
+    private String processCashCheckRequest(CheckRequestMessage checkRequestMessage)
+    {
+        return OutcomeType.SUCCESS.toString();
+    }
+
+    private String processPositionCheckRequest(CheckRequestMessage checkRequestMessage)
+    {
+        return OutcomeType.SUCCESS.toString();
+    }
+
+    private String processExecution(ExecutionMessage executionMessage)
+    {
+        return OutcomeType.SUCCESS.toString();
     }
 
     public void uploadSODPositions(String startOfDayInventoryPositionFilePath)
