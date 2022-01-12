@@ -4,16 +4,16 @@ public class MessageFactory
 {
 	public static ExecutionMessage createExecutionMessage(String payload)
 	{
-		return null;
+		return new ExecutionMessage();
 	}
 
 	public static CheckRequestMessage createCashCheckRequestMessage(String payload)
 	{
-		return null;
+		return new CheckRequestMessage();
 	}
 
 	public static CheckRequestMessage createPositionCheckRequestMessage(String payload)
 	{
-		return null;
+		return new CheckRequestMessage();
 	}
 }
