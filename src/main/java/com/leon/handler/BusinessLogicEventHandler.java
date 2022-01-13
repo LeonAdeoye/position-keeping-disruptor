@@ -51,12 +51,12 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
         outboundDisruptor.push(new DisruptorPayload("RESPONSE", result)); // TODO
     }
 
-    private String processCashCheckRequest(CheckRequestMessage checkRequestMessage)
+    private String processCashCheckRequest(CheckCashRequestMessage checkRequestMessage)
     {
         return OutcomeType.SUCCESS.toString();
     }
 
-    private String processPositionCheckRequest(CheckRequestMessage checkRequestMessage)
+    private String processPositionCheckRequest(CheckStockRequestMessage checkRequestMessage)
     {
         return OutcomeType.SUCCESS.toString();
     }
