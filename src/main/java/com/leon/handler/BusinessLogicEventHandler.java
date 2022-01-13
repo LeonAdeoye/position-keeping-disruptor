@@ -9,7 +9,6 @@ import net.openhft.chronicle.map.ChronicleMap;
 import net.openhft.chronicle.map.ChronicleMapBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -23,8 +22,12 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
 
     public BusinessLogicEventHandler(DisruptorService outboundDisruptor)
     {
-        initializeChronicleMap();
         this.outboundDisruptor = outboundDisruptor;
+    }
+
+    public void start(String chronicleMapFilePath)
+    {
+        initializeChronicleMap(chronicleMapFilePath);
     }
 
     public void onEvent(DisruptorEvent event, long sequence, boolean endOfBatch)
@@ -97,7 +100,7 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
         }
     }
 
-    private void initializeChronicleMap()
+    private void initializeChronicleMap(String chronicleMapFilePath)
     {
         try
         {
@@ -108,9 +111,9 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
                     .averageValue(new PositionInventory())
                     .valueMarshaller(PositionInventorySerializer.getInstance())
                     .averageKey("00000100001") //TODO convert to Bloomberg code
-                    .createPersistedTo(new File("../logs/position-inventory.txt"));
+                    .createPersistedTo(new File(chronicleMapFilePath));
 
-            logger.info("Created the chronicle map with " + persistedDisruptorMap.size() + " inventory positions.");
+            logger.info("Created the chronicle map from persisted file: " + chronicleMapFilePath + " with " + persistedDisruptorMap.size() + " inventory positions.");
         }
         catch(IOException ioe)
         {
@@ -118,7 +121,7 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
         }
     }
 
-    public void close()
+    public void stop()
     {
         if(persistedDisruptorMap != null && persistedDisruptorMap.isOpen())
             persistedDisruptorMap.close();

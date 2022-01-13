@@ -18,6 +18,9 @@ public class ConfigurationServiceImpl
     @Value("${startOfDayInventoryPositionFilePath}")
     private String startOfDayInventoryPositionFilePath;
 
+    @Value("${chronicleMapFilePath}")
+    private String chronicleMapFilePath;
+
     public int getBufferSize()
     {
         return bufferSize;
@@ -34,4 +37,6 @@ public class ConfigurationServiceImpl
     }
 
     public String getStartOfDayInventoryPositionFilePath() { return startOfDayInventoryPositionFilePath; }
+
+    public String getChronicleMapFilePath() { return chronicleMapFilePath; }
 }

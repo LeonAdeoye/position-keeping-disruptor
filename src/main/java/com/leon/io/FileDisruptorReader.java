@@ -16,7 +16,7 @@ public class FileDisruptorReader implements DisruptorReader
     private BufferedReader reader;
 
     @Override
-    public void initialize(String readerFilePath)
+    public void start(String readerFilePath)
     {
         try
         {
@@ -67,7 +67,7 @@ public class FileDisruptorReader implements DisruptorReader
     }
 
     @Override
-    public void close()
+    public void stop()
     {
         try
         {

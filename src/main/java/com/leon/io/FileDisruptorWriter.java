@@ -15,7 +15,7 @@ public class FileDisruptorWriter implements DisruptorWriter
     private String writerFilePath;
 
     @Override
-    public void initialize(ConfigurationServiceImpl configurationService)
+    public void start(ConfigurationServiceImpl configurationService)
     {
         writerFilePath = configurationService.getWriterFilePath();
     }
@@ -33,7 +33,7 @@ public class FileDisruptorWriter implements DisruptorWriter
     }
 
     @Override
-    public void close()
+    public void stop()
     {
 
     }

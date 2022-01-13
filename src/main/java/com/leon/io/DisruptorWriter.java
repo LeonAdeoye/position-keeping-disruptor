@@ -7,8 +7,8 @@ import reactor.core.publisher.Mono;
 
 public interface DisruptorWriter
 {
-    void initialize(ConfigurationServiceImpl configurationService);
+    void start(ConfigurationServiceImpl configurationService);
     int writeAll(Flux<DisruptorPayload> payload);
     void write(Mono<DisruptorPayload> payload);
-    void close();
+    void stop();
 }
