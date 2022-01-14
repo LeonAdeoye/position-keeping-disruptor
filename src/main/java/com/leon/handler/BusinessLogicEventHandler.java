@@ -27,7 +27,6 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
 
     public void onEvent(DisruptorEvent event, long sequence, boolean endOfBatch)
     {
-        String result = "";
         try
         {
             switch (RequestTypeEnum.valueOf(event.getPayload().getPayloadType()))
@@ -36,21 +35,22 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
                     double reservedCash = processCashCheckRequest(MessageFactory.createCashCheckRequestMessage(event.getPayload().getPayload()));
                     break;
                 case POSITION_CHECK_REQUEST_TYPE:
-                    result = processPositionCheckRequest(MessageFactory.createPositionCheckRequestMessage(event.getPayload().getPayload()));
+                    int reservedQuantity = processPositionCheckRequest(MessageFactory.createPositionCheckRequestMessage(event.getPayload().getPayload()));
                     break;
                 case EXECUTION_MESSAGE_TYPE:
-                    result = processExecution(MessageFactory.createExecutionMessage(event.getPayload().getPayload()));
+                    String result = processExecution(MessageFactory.createExecutionMessage(event.getPayload().getPayload()));
             }
         }
         catch(IllegalArgumentException e)
         {
             logger.error("Event ignored because cannot convert " + event.getPayload().getPayloadType() + " to RequestTypeEnum. Exception thrown: " + e.getMessage());
         }
-        outboundDisruptor.push(new DisruptorPayload("RESPONSE", result)); // TODO
+        outboundDisruptor.push(new DisruptorPayload("RESPONSE", "Result is??")); // TODO
     }
 
     private double processCashCheckRequest(CheckCashRequestMessage checkRequestMessage)
     {
+        // TODO Add logging
         String key = checkRequestMessage.getStockCode() + checkRequestMessage.getClientId(); // TODO create the right matching key
         PositionInventory positionInventory = persistedDisruptorMap.get(key);
         double balance = positionInventory.getStartOfDayCash() + positionInventory.getExecutedCash() - positionInventory.getReservedCash();
@@ -69,13 +69,35 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
         return 0.0;
     }
 
-    private String processPositionCheckRequest(CheckStockRequestMessage checkRequestMessage)
+    private int processPositionCheckRequest(CheckStockRequestMessage checkRequestMessage)
     {
-        return OutcomeType.SUCCESS.toString();
+        // TODO Add logging
+        String key = checkRequestMessage.getStockCode() + checkRequestMessage.getClientId(); // TODO create the right matching key
+        PositionInventory positionInventory = persistedDisruptorMap.get(key);
+        int balance = positionInventory.getStartOfDayQuantity() + positionInventory.getExecutedQuantity() - positionInventory.getReservedQuantity();
+        if(balance > checkRequestMessage.getLockQuantity())
+        {
+            positionInventory.setReservedQuantity(positionInventory.getReservedQuantity() + checkRequestMessage.getLockQuantity());
+            // TODO Write to chronicle map
+            return checkRequestMessage.getLockQuantity();
+        }
+        if(balance > 0 && balance < checkRequestMessage.getLockQuantity())
+        {
+            positionInventory.setReservedQuantity(positionInventory.getReservedQuantity() + balance);
+            // TODO Write to chronicle map
+            return balance;
+        }
+        return 0;
     }
 
     private String processExecution(ExecutionMessage executionMessage)
     {
+        // TODO Add logging
+        String key = executionMessage.getStockCode() + executionMessage.getClientId(); // TODO create the right matching key
+        PositionInventory positionInventory = persistedDisruptorMap.get(key);
+        positionInventory.setExecutedCash(positionInventory.getExecutedCash());
+        positionInventory.setExecutedQuantity(positionInventory.getExecutedQuantity());
+        // TODO Write to chronicle map
         return OutcomeType.SUCCESS.toString();
     }
 
