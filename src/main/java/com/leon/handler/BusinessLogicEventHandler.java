@@ -33,7 +33,7 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
             switch (RequestTypeEnum.valueOf(event.getPayload().getPayloadType()))
             {
                 case CASH_CHECK_REQUEST_TYPE:
-                    result = processCashCheckRequest(MessageFactory.createCashCheckRequestMessage(event.getPayload().getPayload()));
+                    double reservedCash = processCashCheckRequest(MessageFactory.createCashCheckRequestMessage(event.getPayload().getPayload()));
                     break;
                 case POSITION_CHECK_REQUEST_TYPE:
                     result = processPositionCheckRequest(MessageFactory.createPositionCheckRequestMessage(event.getPayload().getPayload()));
@@ -49,9 +49,24 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
         outboundDisruptor.push(new DisruptorPayload("RESPONSE", result)); // TODO
     }
 
-    private String processCashCheckRequest(CheckCashRequestMessage checkRequestMessage)
+    private double processCashCheckRequest(CheckCashRequestMessage checkRequestMessage)
     {
-        return OutcomeType.SUCCESS.toString();
+        String key = checkRequestMessage.getStockCode() + checkRequestMessage.getClientId(); // TODO create the right matching key
+        PositionInventory positionInventory = persistedDisruptorMap.get(key);
+        double balance = positionInventory.getStartOfDayCash() + positionInventory.getExecutedCash() - positionInventory.getReservedCash();
+        if(balance > checkRequestMessage.getLockCash())
+        {
+            positionInventory.setReservedCash(positionInventory.getReservedCash() + checkRequestMessage.getLockCash());
+            // TODO Write to chronicle map
+            return checkRequestMessage.getLockCash();
+        }
+        if(balance > 0.0 && balance < checkRequestMessage.getLockCash())
+        {
+            positionInventory.setReservedCash(positionInventory.getReservedCash() + balance);
+            // TODO Write to chronicle map
+            return balance;
+        }
+        return 0.0;
     }
 
     private String processPositionCheckRequest(CheckStockRequestMessage checkRequestMessage)
