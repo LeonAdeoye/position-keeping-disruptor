@@ -48,46 +48,79 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
         outboundDisruptor.push(new DisruptorPayload("RESPONSE", "Result is??")); // TODO
     }
 
+    private String printPositionInventory(PositionInventory positionInventory, int lockedQuantity)
+    {
+        return String.format("SOD position quantity: {0},\n Executed position quantity: {1},\n Reserved position quantity: {3},\n Recently locked position quantity: {4}",
+                positionInventory.getStartOfDayQuantity(),
+                positionInventory.getExecutedQuantity(),
+                positionInventory.getReservedQuantity(),
+                lockedQuantity);
+    }
+
+    private String printCashInventory(PositionInventory positionInventory, double lockedCash)
+    {
+        return String.format("SOD cash: {0},\n Executed cash: {1},\n Reserved cash: {3},\n Recently locked cash: {4}",
+                positionInventory.getStartOfDayCash(),
+                positionInventory.getExecutedCash(),
+                positionInventory.getReservedCash(),
+                lockedCash);
+    }
+
     private double processCashCheckRequest(CheckCashRequestMessage checkRequestMessage)
     {
-        // TODO Add logging
         String key = checkRequestMessage.getStockCode() + checkRequestMessage.getClientId(); // TODO create the right matching key
         PositionInventory positionInventory = persistedDisruptorMap.get(key);
         double balance = positionInventory.getStartOfDayCash() + positionInventory.getExecutedCash() - positionInventory.getReservedCash();
+        double lockedCash = 0.0;
+
         if(balance > checkRequestMessage.getLockCash())
         {
             positionInventory.setReservedCash(positionInventory.getReservedCash() + checkRequestMessage.getLockCash());
             // TODO Write to chronicle map
-            return checkRequestMessage.getLockCash();
+            lockedCash = checkRequestMessage.getLockCash();;
         }
-        if(balance > 0.0 && balance < checkRequestMessage.getLockCash())
+        else if(balance > 0.0 && balance < checkRequestMessage.getLockCash())
         {
             positionInventory.setReservedCash(positionInventory.getReservedCash() + balance);
             // TODO Write to chronicle map
-            return balance;
+            lockedCash  =  balance;
         }
-        return 0.0;
+
+        logger.info(String.format("Cash checked completed. For stock: {1} and client: {2} the current cash inventory is: {3}",
+                checkRequestMessage.getStockCode(),
+                checkRequestMessage.getClientId(),
+                printCashInventory(positionInventory,
+                lockedCash)));
+
+        return lockedCash;
     }
 
     private int processPositionCheckRequest(CheckStockRequestMessage checkRequestMessage)
     {
-        // TODO Add logging
         String key = checkRequestMessage.getStockCode() + checkRequestMessage.getClientId(); // TODO create the right matching key
         PositionInventory positionInventory = persistedDisruptorMap.get(key);
         int balance = positionInventory.getStartOfDayQuantity() + positionInventory.getExecutedQuantity() - positionInventory.getReservedQuantity();
+        int lockedQuantity = 0;
         if(balance > checkRequestMessage.getLockQuantity())
         {
             positionInventory.setReservedQuantity(positionInventory.getReservedQuantity() + checkRequestMessage.getLockQuantity());
             // TODO Write to chronicle map
-            return checkRequestMessage.getLockQuantity();
+            lockedQuantity = checkRequestMessage.getLockQuantity();
         }
         if(balance > 0 && balance < checkRequestMessage.getLockQuantity())
         {
             positionInventory.setReservedQuantity(positionInventory.getReservedQuantity() + balance);
             // TODO Write to chronicle map
-            return balance;
+            lockedQuantity = balance;
         }
-        return 0;
+
+        logger.info(String.format("Position check completed. For stock: {1} and client: {2} the current position inventory is: {3}",
+                checkRequestMessage.getStockCode(),
+                checkRequestMessage.getClientId(),
+                printPositionInventory(positionInventory,
+                lockedQuantity)));
+
+        return lockedQuantity;
     }
 
     private String processExecution(ExecutionMessage executionMessage)
