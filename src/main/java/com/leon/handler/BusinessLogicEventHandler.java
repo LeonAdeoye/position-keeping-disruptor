@@ -25,11 +25,6 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
         this.outboundDisruptor = outboundDisruptor;
     }
 
-    public void start(String chronicleMapFilePath)
-    {
-        initializeChronicleMap(chronicleMapFilePath);
-    }
-
     public void onEvent(DisruptorEvent event, long sequence, boolean endOfBatch)
     {
         String result = "";
@@ -69,37 +64,6 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
         return OutcomeType.SUCCESS.toString();
     }
 
-    public void uploadSODPositions(String startOfDayInventoryPositionFilePath)
-    {
-        try
-        {
-            int size = persistedDisruptorMap.size();
-            if(size > 0)
-            {
-                persistedDisruptorMap.clear();
-                logger.info("Cleared the chronicle map of " + size + " inventory positions.");
-            }
-
-            final ObjectMapper objectMapper = new ObjectMapper();
-            List<PositionInventory> positionInventories = objectMapper.readValue(
-                    new File(startOfDayInventoryPositionFilePath),
-                    new TypeReference<List<PositionInventory>>(){});
-
-            positionInventories.forEach(positionInventory ->
-                    persistedDisruptorMap.put(String.format("%05d%s", positionInventory.getClientId(), positionInventory.getStockCode()), positionInventory));
-
-            logger.info("Loaded Chronicle map with " + positionInventories.size() + " inventory positions.");
-        }
-        catch (FileNotFoundException e)
-        {
-            e.printStackTrace();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-    }
-
     private void initializeChronicleMap(String chronicleMapFilePath)
     {
         try
@@ -121,10 +85,53 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
         }
     }
 
+    public void start(String chronicleMapFilePath)
+    {
+        initializeChronicleMap(chronicleMapFilePath);
+    }
+
     public void stop()
     {
         if(persistedDisruptorMap != null && persistedDisruptorMap.isOpen())
             persistedDisruptorMap.close();
+
         logger.info("Closed Chronicle map with inventory positions.");
+    }
+
+    public void uploadSODPositions(String startOfDayInventoryPositionFilePath)
+    {
+        if(persistedDisruptorMap == null || persistedDisruptorMap.isClosed())
+        {
+            logger.error("Chronicle map is in an invalid state and upload is not possible.");
+            return;
+        }
+
+        try
+        {
+            int size = persistedDisruptorMap.size();
+            if(size > 0)
+            {
+                persistedDisruptorMap.clear();
+                logger.info("Cleared the chronicle map of " + size + " inventory positions.");
+            }
+
+            final ObjectMapper objectMapper = new ObjectMapper();
+            List<PositionInventory> positionInventories = objectMapper.readValue(
+                    new File(startOfDayInventoryPositionFilePath),
+                    new TypeReference<List<PositionInventory>>(){});
+
+            positionInventories.forEach(positionInventory ->
+                    persistedDisruptorMap.put(String.format("%05d%s", positionInventory.getClientId(), positionInventory.getStockCode()), positionInventory));
+
+            logger.info("Loaded Chronicle map with " + positionInventories.size() + " inventory positions.");
+        }
+        catch (FileNotFoundException fnfe)
+        {
+            logger.error(fnfe.getLocalizedMessage());
+        }
+        catch (IOException ioe)
+        {
+            logger.error(ioe.getLocalizedMessage());
+        }
     }
 }

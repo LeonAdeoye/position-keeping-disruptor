@@ -43,7 +43,7 @@ public class OrchestrationServiceImpl implements OrchestrationService
     {
         if(!started)
         {
-            // TODO handle upload either after start  or before start
+            // TODO handle upload either after start or before start
             businessLogicEventHandler.start(configurationService.getChronicleMapFilePath());
 
             requestReader.start(configurationService.getReaderFilePath());
