@@ -29,13 +29,18 @@ public class OrchestrationServiceImpl implements OrchestrationService
     @Autowired
     private DisruptorWriter responseWriter;
     private BusinessLogicEventHandler businessLogicEventHandler;
-    boolean started = false;
+    private boolean uploaded = false;
+    private boolean stopped = false;
+    private boolean started = false;
 
     @PostConstruct
     public void initialization()
     {
         businessLogicEventHandler = new BusinessLogicEventHandler(outboundDisruptor);
+        businessLogicEventHandler.start(configurationService.getChronicleMapFilePath());
         logger.info("Initialization completed.");
+        uploaded = true;
+
     }
 
     @Override
@@ -43,14 +48,12 @@ public class OrchestrationServiceImpl implements OrchestrationService
     {
         if(!started)
         {
-            // TODO handle upload either after start or before start
-            businessLogicEventHandler.start(configurationService.getChronicleMapFilePath());
-
             requestReader.start(configurationService.getReaderFilePath());
             responseWriter.start(configurationService);
             inboundDisruptor.start("INBOUND", new InboundJournalEventHandler(), businessLogicEventHandler);
             outboundDisruptor.start("OUTBOUND", new OutboundJournalEventHandler(), new PublishingEventHandler(responseWriter) );
             requestReader.readAll().subscribe((request) -> inboundDisruptor.push(request));
+            uploaded = false;
             started = true;
             logger.info("Starting of disruptors completed.");
         }
@@ -61,14 +64,15 @@ public class OrchestrationServiceImpl implements OrchestrationService
     @Override
     public void stop()
     {
-        if(started)
+        if(!stopped)
         {
             businessLogicEventHandler.stop();
             inboundDisruptor.stop();
             outboundDisruptor.stop();
             requestReader.stop();
             responseWriter.stop();
-            started = false;
+            uploaded = false;
+            stopped = true;
             logger.info("Shutdown and cleanup completed.");
         }
         else
@@ -78,9 +82,12 @@ public class OrchestrationServiceImpl implements OrchestrationService
     @Override
     public void upload(String sodFilePath)
     {
-        if(businessLogicEventHandler != null && started)
+        if(businessLogicEventHandler != null && uploaded)
+        {
             businessLogicEventHandler.uploadSODPositions(sodFilePath);
+            uploaded = false;
+        }
         else
-            logger.error("Upload cannot run when orchestration service has already started its disruptors.");
+            logger.error("Cannot upload SOD file because orchestration service is not in the right state.");
     }
 }
