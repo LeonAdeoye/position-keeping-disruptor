@@ -1,4 +1,4 @@
-[{"clientId": 1, "stockCode":  "0001.HK", "startOfDayQuantity":  1000000, "executedQuantity": 0, "reservedQuantity": 0, "borrowedQuantity": 0, "startOfDayCash": 1000000, "executedCash": 0, "reservedCash": 0 },
-{"clientId": 1, "stockCode":  "0002.HK", "startOfDayQuantity":  1000000, "executedQuantity": 0, "reservedQuantity": 0, "borrowedQuantity": 0, "startOfDayCash": 1000000, "executedCash": 0, "reservedCash": 0 },
-{"clientId": 1, "stockCode":  "0003.HK", "startOfDayQuantity":  1000000, "executedQuantity": 0, "reservedQuantity": 0, "borrowedQuantity": 0, "startOfDayCash": 1000000, "executedCash": 0, "reservedCash": 0 },
-{"clientId": 2, "stockCode":  "0001.HK", "startOfDayQuantity":  2000000, "executedQuantity": 0, "reservedQuantity": 0, "borrowedQuantity": 0, "startOfDayCash": 1000000, "executedCash": 0, "reservedCash": 0 }]
+[{"clientId": 1, "instrumentId":  1, "startOfDayQuantity":  1000000, "executedQuantity": 0, "reservedQuantity": 0, "borrowedQuantity": 0, "startOfDayCash": 1000000, "executedCash": 0, "reservedCash": 0 },
+{"clientId": 1, "instrumentId":  2, "startOfDayQuantity":  1000000, "executedQuantity": 0, "reservedQuantity": 0, "borrowedQuantity": 0, "startOfDayCash": 1000000, "executedCash": 0, "reservedCash": 0 },
+{"clientId": 1, "instrumentId":  3, "startOfDayQuantity":  1000000, "executedQuantity": 0, "reservedQuantity": 0, "borrowedQuantity": 0, "startOfDayCash": 1000000, "executedCash": 0, "reservedCash": 0 },
+{"clientId": 2, "instrumentId":  1, "startOfDayQuantity":  2000000, "executedQuantity": 0, "reservedQuantity": 0, "borrowedQuantity": 0, "startOfDayCash": 1000000, "executedCash": 0, "reservedCash": 0 }]
