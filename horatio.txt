@@ -1,5 +1,6 @@
-bufferSize=4096
-writerFilePath=resources/output.txt
-readerFilePath=application.properties
-server.port=20010
-server.hostname=localhost
+CASH_CHECK_REQUEST={"clientId": 1, "instrumentId":  1, "requestType":  "CASH_CHECK_REQUEST", "lockCash": 100, "unlockCash": 0 }
+CASH_CHECK_REQUEST={"clientId": 1, "instrumentId":  2, "requestType":  "CASH_CHECK_REQUEST", "lockCash": 100, "unlockCash": 0 }
+CASH_CHECK_REQUEST={"clientId": 2, "instrumentId":  1, "requestType":  "CASH_CHECK_REQUEST", "lockCash": 100, "unlockCash": 0 }
+POSITION_CHECK_REQUEST={"clientId": 1, "instrumentId":  1, "requestType":  "POSITION_CHECK_REQUEST", "lockQuantity": 1000, "unlockQuantity": 0 }
+POSITION_CHECK_REQUEST={"clientId": 1, "instrumentId":  2, "requestType":  "POSITION_CHECK_REQUEST", "lockQuantity": 1000, "unlockQuantity": 0 }
+POSITION_CHECK_REQUEST={"clientId": 1, "instrumentId":  2, "requestType":  "POSITION_CHECK_REQUEST", "lockQuantity": 0, "unlockQuantity": 500 }

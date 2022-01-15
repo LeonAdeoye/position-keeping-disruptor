@@ -31,26 +31,27 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
         {
             switch (RequestTypeEnum.valueOf(event.getPayload().getPayloadType()))
             {
-                case CASH_CHECK_REQUEST_TYPE:
+                case CASH_CHECK_REQUEST:
                     double reservedCash = processCashCheckRequest(MessageFactory.createCashCheckRequestMessage(event.getPayload().getPayload()));
                     break;
-                case POSITION_CHECK_REQUEST_TYPE:
+                case POSITION_CHECK_REQUEST:
                     int reservedQuantity = processPositionCheckRequest(MessageFactory.createPositionCheckRequestMessage(event.getPayload().getPayload()));
                     break;
-                case EXECUTION_MESSAGE_TYPE:
+                case EXECUTION_MESSAGE:
                     processExecution(MessageFactory.createExecutionMessage(event.getPayload().getPayload()));
             }
         }
         catch(IllegalArgumentException e)
         {
-            logger.error("Event ignored because cannot convert " + event.getPayload().getPayloadType() + " to RequestTypeEnum. Exception thrown: " + e.getMessage());
+            e.printStackTrace();
+            logger.error("Event ignored because cannot convert " + event.getPayload().getPayloadType() + " to RequestTypeEnum. Exception thrown: " + e.getLocalizedMessage());
         }
         outboundDisruptor.push(new DisruptorPayload("RESPONSE", "Result is??")); // TODO
     }
 
     private String printPositionInventory(Inventory inventory, int lockedQuantity)
     {
-        return String.format("SOD position quantity: {0},\n Executed position quantity: {1},\n Reserved position quantity: {2},\n Recently locked position quantity: {3}",
+        return String.format("SOD position quantity: %d, Executed position quantity: %d, Reserved position quantity: %d, Recently locked position quantity: %d",
                 inventory.getStartOfDayQuantity(),
                 inventory.getExecutedQuantity(),
                 inventory.getReservedQuantity(),
@@ -59,7 +60,7 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
 
     private String printCashInventory(Inventory inventory, double lockedCash)
     {
-        return String.format("SOD cash: {0},\n Executed cash: {1},\n Reserved cash: {2},\n Recently locked cash: {3}",
+        return String.format("SOD cash: %f, Executed cash: %f, Reserved cash: %f, Recently locked cash: %f",
                 inventory.getStartOfDayCash(),
                 inventory.getExecutedCash(),
                 inventory.getReservedCash(),
@@ -68,7 +69,7 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
 
     private String printInventory(Inventory inventory)
     {
-        return String.format("SOD cash: {0},\n Executed cash: {1},\n Reserved cash: {2},\nSOD position quantity: {3},\n Executed position quantity: {4},\n Reserved position quantity: {5}",
+        return String.format("SOD cash: 5f, Executed cash: %f, Reserved cash: %f,SOD position quantity: %d, Executed position quantity: %d, Reserved position quantity: %d",
                 inventory.getStartOfDayCash(),
                 inventory.getExecutedCash(),
                 inventory.getReservedCash(),
@@ -96,7 +97,7 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
         }
 
         persistedDisruptorMap.put(key, inventory);
-        logger.info(String.format("Cash checked completed. For stock: {1} and client: {2} the current cash inventory is: {3}",
+        logger.info(String.format("Cash checked completed. For stock: %06d and client: %06d the current cash inventory is: %s",
                 checkRequestMessage.getInstrumentId(),
                 checkRequestMessage.getClientId(),
                 printCashInventory(inventory,
@@ -123,7 +124,7 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
         }
 
         persistedDisruptorMap.put(key, inventory);
-        logger.info(String.format("Position check completed. For stock: {1} and client: {2} the current position inventory is: {3}",
+        logger.info(String.format("Position check completed. For stock: %06d and client: %06d the current position inventory is: %s",
                 checkRequestMessage.getInstrumentId(),
                 checkRequestMessage.getClientId(),
                 printPositionInventory(inventory,
@@ -134,7 +135,7 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
 
     private void processExecution(ExecutionMessage executionMessage)
     {
-        String key = String.format("%06%06d", executionMessage.getInstrumentId(), executionMessage.getClientId());
+        String key = String.format("%06d%06d", executionMessage.getInstrumentId(), executionMessage.getClientId());
         Inventory inventory = persistedDisruptorMap.get(key);
         if(executionMessage.getSide() == 'B')
             inventory.setExecutedCash(inventory.getExecutedCash() + (executionMessage.getExecutedQuantity() * executionMessage.getExecutedPrice()));
@@ -201,7 +202,7 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
                     new TypeReference<List<Inventory>>(){});
 
             positionInventories.forEach(inventory ->
-                    persistedDisruptorMap.put(String.format("%06d%06d", inventory.getClientId(), inventory.getInstrumentId()), inventory));
+                    persistedDisruptorMap.put(String.format("%06d%06d",  inventory.getInstrumentId(), inventory.getClientId()), inventory));
 
             logger.info("Loaded Chronicle map with " + positionInventories.size() + " inventory positions.");
         }

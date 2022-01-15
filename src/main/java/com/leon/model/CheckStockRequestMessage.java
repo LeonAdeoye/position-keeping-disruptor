@@ -13,14 +13,17 @@ public class CheckStockRequestMessage
 	@JsonProperty("clientId")
 	private int clientId;
 	@JsonProperty("instrumentId")
-	private String instrumentId;
+	private int instrumentId;
+	@JsonProperty("requestType")
+	private String requestType;
 
-	public CheckStockRequestMessage(int lockQuantity, int unlockQuantity, int clientId, String instrumentId)
+	public CheckStockRequestMessage(int lockQuantity, int unlockQuantity, int clientId, int instrumentId, String requestType)
 	{
 		this.lockQuantity = lockQuantity;
 		this.unlockQuantity = unlockQuantity;
 		this.clientId = clientId;
 		this.instrumentId = instrumentId;
+		this.requestType = requestType;
 	}
 
 	public CheckStockRequestMessage()
@@ -57,20 +60,30 @@ public class CheckStockRequestMessage
 		this.clientId = clientId;
 	}
 
-	public String getInstrumentId()
+	public int getInstrumentId()
 	{
 		return instrumentId;
 	}
 
-	public void setInstrumentId(String instrumentId)
+	public void setInstrumentId(int instrumentId)
 	{
 		this.instrumentId = instrumentId;
+	}
+
+	public String getRequestType()
+	{
+		return requestType;
+	}
+
+	public void setRequestType(String requestType)
+	{
+		this.requestType = requestType;
 	}
 
 	@Override
 	public String toString()
 	{
-		return "CheckStockRequestMessage{" + "lockQuantity=" + lockQuantity + ", unlockQuantity=" + unlockQuantity + ", clientId=" + clientId + ", instrumentId='" + instrumentId + '\'' + '}';
+		return "CheckStockRequestMessage{" + "lockQuantity=" + lockQuantity + ", unlockQuantity=" + unlockQuantity + ", clientId=" + clientId + ", instrumentId=" + instrumentId  + ", requestType=" + requestType + "}";
 	}
 
 	@Override
@@ -79,12 +92,12 @@ public class CheckStockRequestMessage
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		CheckStockRequestMessage that = (CheckStockRequestMessage) o;
-		return getLockQuantity() == that.getLockQuantity() && getUnlockQuantity() == that.getUnlockQuantity() && getClientId() == that.getClientId() && getInstrumentId() == that.getInstrumentId();
+		return getLockQuantity() == that.getLockQuantity() && getUnlockQuantity() == that.getUnlockQuantity() && getClientId() == that.getClientId() && getInstrumentId() == that.getInstrumentId() && getRequestType().equals(that.getRequestType());
 	}
 
 	@Override
 	public int hashCode()
 	{
-		return Objects.hash(getLockQuantity(), getUnlockQuantity(), getClientId(), getInstrumentId());
+		return Objects.hash(getLockQuantity(), getUnlockQuantity(), getClientId(), getInstrumentId(), getRequestType());
 	}
 }
