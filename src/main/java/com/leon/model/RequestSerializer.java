@@ -23,7 +23,7 @@ public final class RequestSerializer implements SizedReader<InventoryCheckReques
 
         using.setSide(in.readChar());
         using.setQuantity(in.readLong());
-        using.setStockCode(in.readUtf8());
+        using.setInstrumentId(in.readUtf8());
         using.setClientCode(in.readChar());
         using.setOrderId(in.readUtf8());
         using.setSequenceId(in.readInt());
@@ -44,7 +44,7 @@ public final class RequestSerializer implements SizedReader<InventoryCheckReques
     {
         out.writeChar(toWrite.getSide());
         out.writeLong(toWrite.getQuantity());
-        out.writeUtf8(toWrite.getStockCode());
+        out.writeUtf8(toWrite.getInstrumentId());
         out.writeInt(toWrite.getClientCode());
         out.writeUtf8(toWrite.getOrderId());
         out.writeInt(toWrite.getSequenceId());

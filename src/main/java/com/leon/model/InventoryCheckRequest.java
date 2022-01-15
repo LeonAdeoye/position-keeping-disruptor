@@ -12,7 +12,7 @@ public class InventoryCheckRequest
     @JsonProperty("quantity")
     private long quantity;
     @JsonProperty("stockCode")
-    private String stockCode;
+    private String instrumentId;
     @JsonProperty("clientCode")
     private int clientCode;
     @JsonProperty("orderId")
@@ -21,11 +21,11 @@ public class InventoryCheckRequest
     private int sequenceId;
     @JsonProperty("requestType")
     private String requestType;
-    public InventoryCheckRequest(char side, long quantity, String stockCode, int clientCode, String orderId, int sequenceId, String requestType)
+    public InventoryCheckRequest(char side, long quantity, String instrumentId, int clientCode, String orderId, int sequenceId, String requestType)
     {
         this.side = side;
         this.quantity = quantity;
-        this.stockCode = stockCode;
+        this.instrumentId = instrumentId;
         this.clientCode = clientCode;
         this.orderId = orderId;
         this.sequenceId = sequenceId;
@@ -57,13 +57,13 @@ public class InventoryCheckRequest
         this.quantity = quantity;
     }
 
-    public String getStockCode() {
-        return stockCode;
+    public String getInstrumentId() {
+        return instrumentId;
     }
 
-    public void setStockCode(String stockCode)
+    public void setInstrumentId(String instrumentId)
     {
-        this.stockCode = stockCode;
+        this.instrumentId = instrumentId;
     }
 
     public int getClientCode()
@@ -113,14 +113,14 @@ public class InventoryCheckRequest
         if (o == null || getClass() != o.getClass()) return false;
         InventoryCheckRequest request = (InventoryCheckRequest) o;
         return getSide() == request.getSide() && getQuantity() == request.getQuantity() && getClientCode() == request.getClientCode()
-                && getSequenceId() == request.getSequenceId() && getStockCode().equals(request.getStockCode()) && Objects.equals(getOrderId(), request.getOrderId())
+                && getSequenceId() == request.getSequenceId() && getInstrumentId() == request.getInstrumentId() && Objects.equals(getOrderId(), request.getOrderId())
                 && getRequestType().equals(request.getRequestType());
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hash(getSide(), getQuantity(), getStockCode(), getClientCode(), getOrderId(), getSequenceId(), getRequestType());
+        return Objects.hash(getSide(), getQuantity(), getInstrumentId(), getClientCode(), getOrderId(), getSequenceId(), getRequestType());
     }
 
     @Override
@@ -129,7 +129,7 @@ public class InventoryCheckRequest
         return "Request{" +
                 "side=" + side +
                 ", quantity=" + quantity +
-                ", stockCode='" + stockCode + '\'' +
+                ", instrumentId='" + instrumentId + '\'' +
                 ", clientCode=" + clientCode +
                 ", orderId='" + orderId + '\'' +
                 ", sequenceId=" + sequenceId +
