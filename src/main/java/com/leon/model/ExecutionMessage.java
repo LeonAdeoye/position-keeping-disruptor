@@ -18,8 +18,8 @@ public class ExecutionMessage
 	private String executionId;
 	@JsonProperty("orderId")
 	private String orderId;
-	@JsonProperty("stockCode")
-	private String stockCode;
+	@JsonProperty("instrumentId")
+	private int instrumentId;
 	@JsonProperty("clientId")
 	private int clientId;
 
@@ -27,7 +27,7 @@ public class ExecutionMessage
 	{
 	}
 
-	public ExecutionMessage(int executedQuantity, int cumulativeQuantity, int orderQuantity, char side, String executionId, String orderId, String stockCode, int clientId)
+	public ExecutionMessage(int executedQuantity, int cumulativeQuantity, int orderQuantity, char side, String executionId, String orderId, int instrumentId, int clientId)
 	{
 		this.executedQuantity = executedQuantity;
 		this.cumulativeQuantity = cumulativeQuantity;
@@ -35,7 +35,7 @@ public class ExecutionMessage
 		this.side = side;
 		this.executionId = executionId;
 		this.orderId = orderId;
-		this.stockCode = stockCode;
+		this.instrumentId = instrumentId;
 		this.clientId = clientId;
 	}
 
@@ -99,14 +99,14 @@ public class ExecutionMessage
 		this.orderId = orderId;
 	}
 
-	public String getStockCode()
+	public int getInstrumentId()
 	{
-		return stockCode;
+		return instrumentId;
 	}
 
-	public void setStockCode(String stockCode)
+	public void setInstrumentId(int instrumentId)
 	{
-		this.stockCode = stockCode;
+		this.instrumentId = instrumentId;
 	}
 
 	public int getClientId()
@@ -122,7 +122,7 @@ public class ExecutionMessage
 	@Override
 	public String toString()
 	{
-		return "ExecutionMessage{" + "executedQuantity=" + executedQuantity + ", cumulativeQuantity=" + cumulativeQuantity + ", orderQuantity=" + orderQuantity + ", side=" + side + ", executionId='" + executionId + '\'' + ", orderId='" + orderId + '\'' + ", stockCode='" + stockCode + '\'' + ", clientId=" + clientId + '}';
+		return "ExecutionMessage{" + "executedQuantity=" + executedQuantity + ", cumulativeQuantity=" + cumulativeQuantity + ", orderQuantity=" + orderQuantity + ", side=" + side + ", executionId='" + executionId + '\'' + ", orderId='" + orderId + '\'' + ", instrumentId='" + instrumentId + '\'' + ", clientId=" + clientId + '}';
 	}
 
 	@Override
@@ -131,12 +131,12 @@ public class ExecutionMessage
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		ExecutionMessage that = (ExecutionMessage) o;
-		return getExecutedQuantity() == that.getExecutedQuantity() && getCumulativeQuantity() == that.getCumulativeQuantity() && getOrderQuantity() == that.getOrderQuantity() && getSide() == that.getSide() && getClientId() == that.getClientId() && getExecutionId().equals(that.getExecutionId()) && getOrderId().equals(that.getOrderId()) && getStockCode().equals(that.getStockCode());
+		return getExecutedQuantity() == that.getExecutedQuantity() && getCumulativeQuantity() == that.getCumulativeQuantity() && getOrderQuantity() == that.getOrderQuantity() && getSide() == that.getSide() && getClientId() == that.getClientId() && getExecutionId().equals(that.getExecutionId()) && getOrderId().equals(that.getOrderId()) && getInstrumentId() == that.getInstrumentId();
 	}
 
 	@Override
 	public int hashCode()
 	{
-		return Objects.hash(getExecutedQuantity(), getCumulativeQuantity(), getOrderQuantity(), getSide(), getExecutionId(), getOrderId(), getStockCode(), getClientId());
+		return Objects.hash(getExecutedQuantity(), getCumulativeQuantity(), getOrderQuantity(), getSide(), getExecutionId(), getOrderId(), getInstrumentId(), getClientId());
 	}
 }

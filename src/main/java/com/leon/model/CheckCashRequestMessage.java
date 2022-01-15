@@ -12,8 +12,8 @@ public class CheckCashRequestMessage
 	private int unlockCash;
 	@JsonProperty("clientId")
 	private int clientId;
-	@JsonProperty("stockCode")
-	private String stockCode;
+	@JsonProperty("instrumentId")
+	private int instrumentId;
 
 	public int getUnlockCash()
 	{
@@ -35,14 +35,14 @@ public class CheckCashRequestMessage
 		this.clientId = clientId;
 	}
 
-	public String getStockCode()
+	public int getInstrumentId()
 	{
-		return stockCode;
+		return instrumentId;
 	}
 
-	public void setStockCode(String stockCode)
+	public void setInstrumentId(int instrumentId)
 	{
-		this.stockCode = stockCode;
+		this.instrumentId = instrumentId;
 	}
 
 	public int getLockCash()
@@ -59,18 +59,18 @@ public class CheckCashRequestMessage
 	{
 	}
 
-	public CheckCashRequestMessage(int lockCash, int unlockCash, int clientId, String stockCode)
+	public CheckCashRequestMessage(int lockCash, int unlockCash, int clientId, int instrumentId)
 	{
 		this.lockCash = lockCash;
 		this.unlockCash = unlockCash;
 		this.clientId = clientId;
-		this.stockCode = stockCode;
+		this.instrumentId = instrumentId;
 	}
 
 	@Override
 	public String toString()
 	{
-		return "CheckCashRequestMessage{" + "lockCash=" + lockCash + ", unlockCash=" + unlockCash + ", clientId=" + clientId + ", stockCode='" + stockCode + '\'' + '}';
+		return "CheckCashRequestMessage{" + "lockCash=" + lockCash + ", unlockCash=" + unlockCash + ", clientId=" + clientId + ", instrumentId='" + instrumentId + '\'' + '}';
 	}
 
 	@Override
@@ -79,12 +79,12 @@ public class CheckCashRequestMessage
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		CheckCashRequestMessage that = (CheckCashRequestMessage) o;
-		return getLockCash() == that.getLockCash() && getUnlockCash() == that.getUnlockCash() && getClientId() == that.getClientId() && getStockCode().equals(that.getStockCode());
+		return getLockCash() == that.getLockCash() && getUnlockCash() == that.getUnlockCash() && getClientId() == that.getClientId() && getInstrumentId() == that.getInstrumentId();
 	}
 
 	@Override
 	public int hashCode()
 	{
-		return Objects.hash(getLockCash(), getUnlockCash(), getClientId(), getStockCode());
+		return Objects.hash(getLockCash(), getUnlockCash(), getClientId(), getInstrumentId());
 	}
 }

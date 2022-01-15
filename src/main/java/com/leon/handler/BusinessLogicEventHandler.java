@@ -18,7 +18,7 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
 {
     private static final Logger logger = LoggerFactory.getLogger(BusinessLogicEventHandler.class);
     private DisruptorService outboundDisruptor;
-    private  ChronicleMap<String, PositionInventory> persistedDisruptorMap;
+    private  ChronicleMap<String, Inventory> persistedDisruptorMap;
 
     public BusinessLogicEventHandler(DisruptorService outboundDisruptor)
     {
@@ -48,48 +48,59 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
         outboundDisruptor.push(new DisruptorPayload("RESPONSE", "Result is??")); // TODO
     }
 
-    private String printPositionInventory(PositionInventory positionInventory, int lockedQuantity)
+    private String printPositionInventory(Inventory inventory, int lockedQuantity)
     {
         return String.format("SOD position quantity: {0},\n Executed position quantity: {1},\n Reserved position quantity: {3},\n Recently locked position quantity: {4}",
-                positionInventory.getStartOfDayQuantity(),
-                positionInventory.getExecutedQuantity(),
-                positionInventory.getReservedQuantity(),
+                inventory.getStartOfDayQuantity(),
+                inventory.getExecutedQuantity(),
+                inventory.getReservedQuantity(),
                 lockedQuantity);
     }
 
-    private String printCashInventory(PositionInventory positionInventory, double lockedCash)
+    private String printCashInventory(Inventory inventory, double lockedCash)
     {
         return String.format("SOD cash: {0},\n Executed cash: {1},\n Reserved cash: {3},\n Recently locked cash: {4}",
-                positionInventory.getStartOfDayCash(),
-                positionInventory.getExecutedCash(),
-                positionInventory.getReservedCash(),
+                inventory.getStartOfDayCash(),
+                inventory.getExecutedCash(),
+                inventory.getReservedCash(),
                 lockedCash);
+    }
+
+    private String printInventory(Inventory inventory)
+    {
+        return String.format("SOD cash: {0},\n Executed cash: {1},\n Reserved cash: {3},\nSOD position quantity: {4},\n Executed position quantity: {5},\n Reserved position quantity: {6}",
+                inventory.getStartOfDayCash(),
+                inventory.getExecutedCash(),
+                inventory.getReservedCash(),
+                inventory.getStartOfDayQuantity(),
+                inventory.getExecutedQuantity(),
+                inventory.getReservedQuantity());
     }
 
     private double processCashCheckRequest(CheckCashRequestMessage checkRequestMessage)
     {
-        String key = checkRequestMessage.getStockCode() + checkRequestMessage.getClientId(); // TODO create the right matching key
-        PositionInventory positionInventory = persistedDisruptorMap.get(key);
-        double balance = positionInventory.getStartOfDayCash() + positionInventory.getExecutedCash() - positionInventory.getReservedCash();
+        String key = String.format("%06d%06d", checkRequestMessage.getInstrumentId(), checkRequestMessage.getClientId());
+        Inventory inventory = persistedDisruptorMap.get(key);
+        double balance = inventory.getStartOfDayCash() + inventory.getExecutedCash() - inventory.getReservedCash();
         double lockedCash = 0.0;
 
         if(balance > checkRequestMessage.getLockCash())
         {
-            positionInventory.setReservedCash(positionInventory.getReservedCash() + checkRequestMessage.getLockCash());
+            inventory.setReservedCash(inventory.getReservedCash() + checkRequestMessage.getLockCash());
             // TODO Write to chronicle map
-            lockedCash = checkRequestMessage.getLockCash();;
+            lockedCash = checkRequestMessage.getLockCash();
         }
         else if(balance > 0.0 && balance < checkRequestMessage.getLockCash())
         {
-            positionInventory.setReservedCash(positionInventory.getReservedCash() + balance);
+            inventory.setReservedCash(inventory.getReservedCash() + balance);
             // TODO Write to chronicle map
             lockedCash  =  balance;
         }
 
         logger.info(String.format("Cash checked completed. For stock: {1} and client: {2} the current cash inventory is: {3}",
-                checkRequestMessage.getStockCode(),
+                checkRequestMessage.getInstrumentId(),
                 checkRequestMessage.getClientId(),
-                printCashInventory(positionInventory,
+                printCashInventory(inventory,
                 lockedCash)));
 
         return lockedCash;
@@ -97,27 +108,27 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
 
     private int processPositionCheckRequest(CheckStockRequestMessage checkRequestMessage)
     {
-        String key = checkRequestMessage.getStockCode() + checkRequestMessage.getClientId(); // TODO create the right matching key
-        PositionInventory positionInventory = persistedDisruptorMap.get(key);
-        int balance = positionInventory.getStartOfDayQuantity() + positionInventory.getExecutedQuantity() - positionInventory.getReservedQuantity();
+        String key = String.format("%06d%06d", checkRequestMessage.getInstrumentId(), checkRequestMessage.getClientId());
+        Inventory inventory = persistedDisruptorMap.get(key);
+        int balance = inventory.getStartOfDayQuantity() + inventory.getExecutedQuantity() - inventory.getReservedQuantity();
         int lockedQuantity = 0;
         if(balance > checkRequestMessage.getLockQuantity())
         {
-            positionInventory.setReservedQuantity(positionInventory.getReservedQuantity() + checkRequestMessage.getLockQuantity());
+            inventory.setReservedQuantity(inventory.getReservedQuantity() + checkRequestMessage.getLockQuantity());
             // TODO Write to chronicle map
             lockedQuantity = checkRequestMessage.getLockQuantity();
         }
         if(balance > 0 && balance < checkRequestMessage.getLockQuantity())
         {
-            positionInventory.setReservedQuantity(positionInventory.getReservedQuantity() + balance);
+            inventory.setReservedQuantity(inventory.getReservedQuantity() + balance);
             // TODO Write to chronicle map
             lockedQuantity = balance;
         }
 
         logger.info(String.format("Position check completed. For stock: {1} and client: {2} the current position inventory is: {3}",
-                checkRequestMessage.getStockCode(),
+                checkRequestMessage.getInstrumentId(),
                 checkRequestMessage.getClientId(),
-                printPositionInventory(positionInventory,
+                printPositionInventory(inventory,
                 lockedQuantity)));
 
         return lockedQuantity;
@@ -125,11 +136,11 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
 
     private String processExecution(ExecutionMessage executionMessage)
     {
-        // TODO Add logging
-        String key = executionMessage.getStockCode() + executionMessage.getClientId(); // TODO create the right matching key
-        PositionInventory positionInventory = persistedDisruptorMap.get(key);
-        positionInventory.setExecutedCash(positionInventory.getExecutedCash());
-        positionInventory.setExecutedQuantity(positionInventory.getExecutedQuantity());
+        String key = String.format("%06%06d", executionMessage.getInstrumentId(), executionMessage.getClientId());
+        Inventory inventory = persistedDisruptorMap.get(key);
+        inventory.setExecutedCash(inventory.getExecutedCash());
+        inventory.setExecutedQuantity(inventory.getExecutedQuantity());
+        logger.info("Processed execution message: " + executionMessage + ", the current inventory is updated to: " + printInventory(inventory));
         // TODO Write to chronicle map
         return OutcomeType.SUCCESS.toString();
     }
@@ -139,12 +150,12 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
         try
         {
             persistedDisruptorMap = ChronicleMapBuilder
-                    .of(String.class, PositionInventory.class)
+                    .of(String.class, Inventory.class)
                     .name("position-inventory-map")
                     .entries(5_000)
-                    .averageValue(new PositionInventory())
-                    .valueMarshaller(PositionInventorySerializer.getInstance())
-                    .averageKey("00000100001") //TODO convert to Bloomberg code
+                    .averageValue(new Inventory())
+                    .valueMarshaller(InventorySerializer.getInstance())
+                    .averageKey("000001000001")
                     .createPersistedTo(new File(chronicleMapFilePath));
 
             logger.info("Created the chronicle map from persisted file: " + chronicleMapFilePath + " with " + persistedDisruptorMap.size() + " inventory positions.");
@@ -186,12 +197,12 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
             }
 
             final ObjectMapper objectMapper = new ObjectMapper();
-            List<PositionInventory> positionInventories = objectMapper.readValue(
+            List<Inventory> positionInventories = objectMapper.readValue(
                     new File(startOfDayInventoryPositionFilePath),
-                    new TypeReference<List<PositionInventory>>(){});
+                    new TypeReference<List<Inventory>>(){});
 
-            positionInventories.forEach(positionInventory ->
-                    persistedDisruptorMap.put(String.format("%05d%s", positionInventory.getClientId(), positionInventory.getStockCode()), positionInventory));
+            positionInventories.forEach(inventory ->
+                    persistedDisruptorMap.put(String.format("%05d%s", inventory.getClientId(), inventory.getInstrumentId()), inventory));
 
             logger.info("Loaded Chronicle map with " + positionInventories.size() + " inventory positions.");
         }

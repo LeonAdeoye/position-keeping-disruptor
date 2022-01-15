@@ -6,23 +6,23 @@ import net.openhft.chronicle.hash.serialization.SizedWriter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class PositionInventorySerializer implements SizedReader<PositionInventory>, SizedWriter<PositionInventory>
+public class InventorySerializer implements SizedReader<Inventory>, SizedWriter<Inventory>
 {
-	private static PositionInventorySerializer INSTANCE = new PositionInventorySerializer();
+	private static InventorySerializer INSTANCE = new InventorySerializer();
 
-	public static PositionInventorySerializer getInstance() { return INSTANCE; }
+	public static InventorySerializer getInstance() { return INSTANCE; }
 
-	private PositionInventorySerializer() {}
+	private InventorySerializer() {}
 
 	@NotNull
 	@Override
-	public PositionInventory read(Bytes in, long size, @Nullable PositionInventory using)
+	public Inventory read(Bytes in, long size, @Nullable Inventory using)
 	{
 		if (using == null)
-			using = new PositionInventory();
+			using = new Inventory();
 
 		using.setClientId(in.readInt());
-		//using.setStockCode(in.readUtf8()); //TODO
+		using.setInstrumentId(in.readInt());
 		using.setStartOfDayQuantity(in.readInt());
 		using.setExecutedQuantity(in.readInt());
 		using.setReservedQuantity(in.readInt());
@@ -35,17 +35,17 @@ public class PositionInventorySerializer implements SizedReader<PositionInventor
 	}
 
 	@Override
-	public long size(@NotNull PositionInventory toWrite)
+	public long size(@NotNull Inventory toWrite)
 	{
-		return Integer.BYTES + Integer.BYTES + Integer.BYTES + Integer.BYTES + Integer.BYTES
+		return Integer.BYTES + Integer.BYTES + Integer.BYTES + Integer.BYTES + Integer.BYTES + Integer.BYTES
 				+ Double.BYTES + Double.BYTES + Double.BYTES;
 	}
 
 	@Override
-	public void write(Bytes out, long size, @NotNull PositionInventory toWrite)
+	public void write(Bytes out, long size, @NotNull Inventory toWrite)
 	{
 		out.writeInt(toWrite.getClientId());
-		//out.writeUtf8(toWrite.getStockCode()); //TODO
+		out.writeInt(toWrite.getInstrumentId());
 		out.writeInt(toWrite.getStartOfDayQuantity());
 		out.writeInt(toWrite.getExecutedQuantity());
 		out.writeInt(toWrite.getReservedQuantity());

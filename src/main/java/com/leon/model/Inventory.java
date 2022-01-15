@@ -4,12 +4,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Objects;
 
-public class PositionInventory
+public class Inventory
 {
 	@JsonProperty("clientId")
 	private int clientId;
-	@JsonProperty("stockCode")
-	private String stockCode;
+	@JsonProperty("instrumentId")
+	private int instrumentId;
 	@JsonProperty("startOfDayQuantity")
 	private int startOfDayQuantity;
 	@JsonProperty("executedQuantity")
@@ -25,10 +25,10 @@ public class PositionInventory
 	@JsonProperty("reservedCash")
 	private double reservedCash;
 
-	public PositionInventory(int clientId, String stockCode, int startOfDayQuantity, int executedQuantity, int reservedQuantity, int borrowedQuantity, double startOfDayCash, double executedCash, double reservedCash)
+	public Inventory(int clientId, int instrumentId, int startOfDayQuantity, int executedQuantity, int reservedQuantity, int borrowedQuantity, double startOfDayCash, double executedCash, double reservedCash)
 	{
 		this.clientId = clientId;
-		this.stockCode = stockCode;
+		this.instrumentId = instrumentId;
 		this.startOfDayQuantity = startOfDayQuantity;
 		this.executedQuantity = executedQuantity;
 		this.reservedQuantity = reservedQuantity;
@@ -38,7 +38,7 @@ public class PositionInventory
 		this.reservedCash = reservedCash;
 	}
 
-	public PositionInventory()
+	public Inventory()
 	{
 	}
 
@@ -52,14 +52,14 @@ public class PositionInventory
 		this.clientId = clientId;
 	}
 
-	public String getStockCode()
+	public int getInstrumentId()
 	{
-		return stockCode;
+		return instrumentId;
 	}
 
-	public void setStockCode(String stockCode)
+	public void setInstrumentId(int instrumentId)
 	{
-		this.stockCode = stockCode;
+		this.instrumentId = instrumentId;
 	}
 
 	public int getStartOfDayQuantity()
@@ -137,19 +137,19 @@ public class PositionInventory
 	{
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
-		PositionInventory that = (PositionInventory) o;
-		return getClientId() == that.getClientId() && getStartOfDayQuantity() == that.getStartOfDayQuantity() && getExecutedQuantity() == that.getExecutedQuantity() && getReservedQuantity() == that.getReservedQuantity() && getBorrowedQuantity() == that.getBorrowedQuantity() && Double.compare(that.getStartOfDayCash(), getStartOfDayCash()) == 0 && Double.compare(that.getExecutedCash(), getExecutedCash()) == 0 && Double.compare(that.getReservedCash(), getReservedCash()) == 0 && getStockCode() == (that.getStockCode());
+		Inventory that = (Inventory) o;
+		return getClientId() == that.getClientId() && getStartOfDayQuantity() == that.getStartOfDayQuantity() && getExecutedQuantity() == that.getExecutedQuantity() && getReservedQuantity() == that.getReservedQuantity() && getBorrowedQuantity() == that.getBorrowedQuantity() && Double.compare(that.getStartOfDayCash(), getStartOfDayCash()) == 0 && Double.compare(that.getExecutedCash(), getExecutedCash()) == 0 && Double.compare(that.getReservedCash(), getReservedCash()) == 0 && getInstrumentId() == (that.getInstrumentId());
 	}
 
 	@Override
 	public int hashCode()
 	{
-		return Objects.hash(getClientId(), getStockCode(), getStartOfDayQuantity(), getExecutedQuantity(), getReservedQuantity(), getBorrowedQuantity(), getStartOfDayCash(), getExecutedCash(), getReservedCash());
+		return Objects.hash(getClientId(), getInstrumentId(), getStartOfDayQuantity(), getExecutedQuantity(), getReservedQuantity(), getBorrowedQuantity(), getStartOfDayCash(), getExecutedCash(), getReservedCash());
 	}
 
 	@Override
 	public String toString()
 	{
-		return "PositionInventory{" + "clientId=" + clientId + ", stockCode='" + stockCode + '\'' + ", startOfDayQuantity=" + startOfDayQuantity + ", executedQuantity=" + executedQuantity + ", reservedQuantity=" + reservedQuantity + ", borrowedQuantity=" + borrowedQuantity + ", startOfDayCash=" + startOfDayCash + ", executedCash=" + executedCash + ", reservedCash=" + reservedCash + '}';
+		return "Inventory{" + "clientId=" + clientId + ", instrumentId='" + instrumentId + '\'' + ", startOfDayQuantity=" + startOfDayQuantity + ", executedQuantity=" + executedQuantity + ", reservedQuantity=" + reservedQuantity + ", borrowedQuantity=" + borrowedQuantity + ", startOfDayCash=" + startOfDayCash + ", executedCash=" + executedCash + ", reservedCash=" + reservedCash + '}';
 	}
 }
