@@ -6,6 +6,8 @@ import java.util.Objects;
 
 public class ExecutionMessage
 {
+	@JsonProperty("executedPrice")
+	private double executedPrice;
 	@JsonProperty("executedQuantity")
 	private int executedQuantity;
 	@JsonProperty("cumulativeQuantity")
@@ -27,8 +29,9 @@ public class ExecutionMessage
 	{
 	}
 
-	public ExecutionMessage(int executedQuantity, int cumulativeQuantity, int orderQuantity, char side, String executionId, String orderId, int instrumentId, int clientId)
+	public ExecutionMessage(double executedPrice, int executedQuantity, int cumulativeQuantity, int orderQuantity, char side, String executionId, String orderId, int instrumentId, int clientId)
 	{
+		this.executedPrice = executedPrice;
 		this.executedQuantity = executedQuantity;
 		this.cumulativeQuantity = cumulativeQuantity;
 		this.orderQuantity = orderQuantity;
@@ -119,10 +122,20 @@ public class ExecutionMessage
 		this.clientId = clientId;
 	}
 
+	public double getExecutedPrice()
+	{
+		return executedPrice;
+	}
+
+	public void setExecutedPrice(double executedPrice)
+	{
+		this.executedPrice = executedPrice;
+	}
+
 	@Override
 	public String toString()
 	{
-		return "ExecutionMessage{" + "executedQuantity=" + executedQuantity + ", cumulativeQuantity=" + cumulativeQuantity + ", orderQuantity=" + orderQuantity + ", side=" + side + ", executionId='" + executionId + '\'' + ", orderId='" + orderId + '\'' + ", instrumentId='" + instrumentId + '\'' + ", clientId=" + clientId + '}';
+		return "ExecutionMessage{" + "executedPrice=" + executedPrice + ", executedQuantity=" + executedQuantity + ", cumulativeQuantity=" + cumulativeQuantity + ", orderQuantity=" + orderQuantity + ", side=" + side + ", executionId='" + executionId + '\'' + ", orderId='" + orderId + '\'' + ", instrumentId=" + instrumentId + ", clientId=" + clientId + '}';
 	}
 
 	@Override
@@ -131,12 +144,12 @@ public class ExecutionMessage
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		ExecutionMessage that = (ExecutionMessage) o;
-		return getExecutedQuantity() == that.getExecutedQuantity() && getCumulativeQuantity() == that.getCumulativeQuantity() && getOrderQuantity() == that.getOrderQuantity() && getSide() == that.getSide() && getClientId() == that.getClientId() && getExecutionId().equals(that.getExecutionId()) && getOrderId().equals(that.getOrderId()) && getInstrumentId() == that.getInstrumentId();
+		return Double.compare(that.getExecutedPrice(), getExecutedPrice()) == 0 && getExecutedQuantity() == that.getExecutedQuantity() && getCumulativeQuantity() == that.getCumulativeQuantity() && getOrderQuantity() == that.getOrderQuantity() && getSide() == that.getSide() && getInstrumentId() == that.getInstrumentId() && getClientId() == that.getClientId() && getExecutionId().equals(that.getExecutionId()) && getOrderId().equals(that.getOrderId());
 	}
 
 	@Override
 	public int hashCode()
 	{
-		return Objects.hash(getExecutedQuantity(), getCumulativeQuantity(), getOrderQuantity(), getSide(), getExecutionId(), getOrderId(), getInstrumentId(), getClientId());
+		return Objects.hash(getExecutedPrice(), getExecutedQuantity(), getCumulativeQuantity(), getOrderQuantity(), getSide(), getExecutionId(), getOrderId(), getInstrumentId(), getClientId());
 	}
 }
