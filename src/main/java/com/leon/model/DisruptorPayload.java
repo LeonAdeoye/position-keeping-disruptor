@@ -36,7 +36,7 @@ public class DisruptorPayload
     @Override
     public String toString()
     {
-        return "DisruptorPayload{" + "payloadType='" + payloadType + '\'' + ", payload='" + payload + '\'' + '}';
+        return "DisruptorPayload{" + "payloadType=" + payloadType + ", payload=" + payload + "}";
     }
 
     @Override

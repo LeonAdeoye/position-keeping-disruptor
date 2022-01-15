@@ -1,7 +1,6 @@
 package com.leon.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Objects;
 
 public class ExecutionMessage
@@ -135,7 +134,7 @@ public class ExecutionMessage
 	@Override
 	public String toString()
 	{
-		return "ExecutionMessage{" + "executedPrice=" + executedPrice + ", executedQuantity=" + executedQuantity + ", cumulativeQuantity=" + cumulativeQuantity + ", orderQuantity=" + orderQuantity + ", side=" + side + ", executionId='" + executionId + '\'' + ", orderId='" + orderId + '\'' + ", instrumentId=" + instrumentId + ", clientId=" + clientId + '}';
+		return "ExecutionMessage{" + "executedPrice=" + executedPrice + ", executedQuantity=" + executedQuantity + ", cumulativeQuantity=" + cumulativeQuantity + ", orderQuantity=" + orderQuantity + ", side=" + side + ", executionId='" + executionId + ", orderId='" + orderId + ", instrumentId=" + instrumentId + ", clientId=" + clientId + '}';
 	}
 
 	@Override

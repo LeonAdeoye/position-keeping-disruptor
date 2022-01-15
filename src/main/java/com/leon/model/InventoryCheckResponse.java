@@ -134,7 +134,7 @@ public class InventoryCheckResponse
 	@Override
 	public String toString()
 	{
-		return "InventoryCheckResponse{" + "reservedQuantity=" + reservedQuantity + ", outstandingQuantity=" + outstandingQuantity + ", result='" + result + '\'' + ", orderId='" + orderId + '\'' + ", clientId=" + clientId + ", instrumentId='" + instrumentId + '\'' + ", side=" + side + ", reservedCash=" + reservedCash + ", outstandingCash=" + outstandingCash + ", requestType='" + requestType + '\'' + ", requestSubType='" + '}';
+		return "InventoryCheckResponse{" + "reservedQuantity=" + reservedQuantity + ", outstandingQuantity=" + outstandingQuantity + ", result='" + result + ", orderId='" + orderId + ", clientId=" + clientId + ", instrumentId='" + instrumentId + ", side=" + side + ", reservedCash=" + reservedCash + ", outstandingCash=" + outstandingCash + ", requestType='" + requestType + ", requestSubType='" + '}';
 	}
 
 	@Override

@@ -129,11 +129,11 @@ public class InventoryCheckRequest
         return "Request{" +
                 "side=" + side +
                 ", quantity=" + quantity +
-                ", instrumentId='" + instrumentId + '\'' +
+                ", instrumentId='" + instrumentId  +
                 ", clientCode=" + clientCode +
-                ", orderId='" + orderId + '\'' +
+                ", orderId='" + orderId +
                 ", sequenceId=" + sequenceId +
-                ", requestType='" + requestType + '\'' +
+                ", requestType='" + requestType +
                 '}';
     }
 }

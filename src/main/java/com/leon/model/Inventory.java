@@ -150,6 +150,6 @@ public class Inventory
 	@Override
 	public String toString()
 	{
-		return "Inventory{" + "clientId=" + clientId + ", instrumentId='" + instrumentId + '\'' + ", startOfDayQuantity=" + startOfDayQuantity + ", executedQuantity=" + executedQuantity + ", reservedQuantity=" + reservedQuantity + ", borrowedQuantity=" + borrowedQuantity + ", startOfDayCash=" + startOfDayCash + ", executedCash=" + executedCash + ", reservedCash=" + reservedCash + '}';
+		return "Inventory{" + "clientId=" + clientId + ", instrumentId='" + instrumentId + ", startOfDayQuantity=" + startOfDayQuantity + ", executedQuantity=" + executedQuantity + ", reservedQuantity=" + reservedQuantity + ", borrowedQuantity=" + borrowedQuantity + ", startOfDayCash=" + startOfDayCash + ", executedCash=" + executedCash + ", reservedCash=" + reservedCash + '}';
 	}
 }
