@@ -50,7 +50,7 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
 
     private String printPositionInventory(Inventory inventory, int lockedQuantity)
     {
-        return String.format("SOD position quantity: {0},\n Executed position quantity: {1},\n Reserved position quantity: {3},\n Recently locked position quantity: {4}",
+        return String.format("SOD position quantity: {0},\n Executed position quantity: {1},\n Reserved position quantity: {2},\n Recently locked position quantity: {3}",
                 inventory.getStartOfDayQuantity(),
                 inventory.getExecutedQuantity(),
                 inventory.getReservedQuantity(),
@@ -59,7 +59,7 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
 
     private String printCashInventory(Inventory inventory, double lockedCash)
     {
-        return String.format("SOD cash: {0},\n Executed cash: {1},\n Reserved cash: {3},\n Recently locked cash: {4}",
+        return String.format("SOD cash: {0},\n Executed cash: {1},\n Reserved cash: {2},\n Recently locked cash: {3}",
                 inventory.getStartOfDayCash(),
                 inventory.getExecutedCash(),
                 inventory.getReservedCash(),
@@ -68,7 +68,7 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
 
     private String printInventory(Inventory inventory)
     {
-        return String.format("SOD cash: {0},\n Executed cash: {1},\n Reserved cash: {3},\nSOD position quantity: {4},\n Executed position quantity: {5},\n Reserved position quantity: {6}",
+        return String.format("SOD cash: {0},\n Executed cash: {1},\n Reserved cash: {2},\nSOD position quantity: {3},\n Executed position quantity: {4},\n Reserved position quantity: {5}",
                 inventory.getStartOfDayCash(),
                 inventory.getExecutedCash(),
                 inventory.getReservedCash(),
