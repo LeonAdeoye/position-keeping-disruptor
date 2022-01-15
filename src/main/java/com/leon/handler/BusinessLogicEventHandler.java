@@ -38,7 +38,7 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
                     int reservedQuantity = processPositionCheckRequest(MessageFactory.createPositionCheckRequestMessage(event.getPayload().getPayload()));
                     break;
                 case EXECUTION_MESSAGE_TYPE:
-                    String result = processExecution(MessageFactory.createExecutionMessage(event.getPayload().getPayload()));
+                    processExecution(MessageFactory.createExecutionMessage(event.getPayload().getPayload()));
             }
         }
         catch(IllegalArgumentException e)
@@ -132,7 +132,7 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
         return lockedQuantity;
     }
 
-    private String processExecution(ExecutionMessage executionMessage)
+    private void processExecution(ExecutionMessage executionMessage)
     {
         String key = String.format("%06%06d", executionMessage.getInstrumentId(), executionMessage.getClientId());
         Inventory inventory = persistedDisruptorMap.get(key);
@@ -142,7 +142,6 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
             inventory.setExecutedQuantity(inventory.getExecutedQuantity() - executionMessage.getExecutedQuantity());
         logger.info("Processed execution message: " + executionMessage + ", the current inventory is updated to: " + printInventory(inventory));
         persistedDisruptorMap.put(key, inventory);
-        return OutcomeType.SUCCESS.toString();
     }
 
     private void initializeChronicleMap(String chronicleMapFilePath)
@@ -202,7 +201,7 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
                     new TypeReference<List<Inventory>>(){});
 
             positionInventories.forEach(inventory ->
-                    persistedDisruptorMap.put(String.format("%05d%s", inventory.getClientId(), inventory.getInstrumentId()), inventory));
+                    persistedDisruptorMap.put(String.format("%06d%06d", inventory.getClientId(), inventory.getInstrumentId()), inventory));
 
             logger.info("Loaded Chronicle map with " + positionInventories.size() + " inventory positions.");
         }
