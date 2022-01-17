@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
 {
@@ -77,51 +78,57 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
         outboundDisruptor.push(new DisruptorPayload("RESPONSE", "Result is??")); // TODO
     }
 
-    private String printCashInventory(Inventory inventory, double lockedCash)
+    private void processCashCheckRequest(CheckCashRequestMessage checkCashRequestMessage)
     {
-        return String.format("SOD cash: %f, Executed cash: %f, Reserved cash: %f, Recently locked cash: %f",
-                inventory.getStartOfDayCash(),
-                inventory.getExecutedCash(),
-                inventory.getReservedCash(),
-                lockedCash);
-    }
-
-    private String printInventory(Inventory inventory)
-    {
-        return String.format("SOD cash: 5f, Executed cash: %f, Reserved cash: %f,SOD position quantity: %d, Executed position quantity: %d, Reserved position quantity: %d",
-                inventory.getStartOfDayCash(),
-                inventory.getExecutedCash(),
-                inventory.getReservedCash(),
-                inventory.getStartOfDayQuantity(),
-                inventory.getExecutedQuantity(),
-                inventory.getReservedQuantity());
-    }
-
-    private double processCashCheckRequest(CheckCashRequestMessage checkRequestMessage)
-    {
-        // TODO Handle FX.
-        String key = String.format("%06d%06d", checkRequestMessage.getInstrumentId(), checkRequestMessage.getClientId());
+        String key = String.format("%06d%06d", checkCashRequestMessage.getInstrumentId(), checkCashRequestMessage.getClientId());
         Inventory inventory = persistedDisruptorMap.get(key);
 
-        double balance = inventory.getStartOfDayCash() + inventory.getExecutedCash() - inventory.getReservedCash();
-        double lockedCash = 0.0;
-
-        if(balance >= checkRequestMessage.getLockCash())
-        {
-            inventory.setReservedCash(inventory.getReservedCash() + checkRequestMessage.getLockCash());
-            lockedCash = checkRequestMessage.getLockCash();
-        }
-        else if(balance > 0.0 && balance < checkRequestMessage.getLockCash())
-        {
-            inventory.setReservedCash(inventory.getReservedCash() + balance);
-            lockedCash  =  balance;
-        }
+        if(checkCashRequestMessage.getLockCash() > 0)
+            handleCashLockRequest(checkCashRequestMessage, inventory);
+        else if(checkCashRequestMessage.getUnlockCash() > 0)
+            handleCashUnlockRequest(checkCashRequestMessage, inventory);
 
         persistedDisruptorMap.put(key, inventory);
-        logger.info(String.format("Cash checked completed. For stock: %06d and client: %06d the current cash inventory is: %s",
-                checkRequestMessage.getInstrumentId(), checkRequestMessage.getClientId(), printCashInventory(inventory, lockedCash)));
+        logger.info(String.format("Completed cash check: %s", checkCashRequestMessage));
+    }
 
-        return lockedCash;
+    private double handleCashLockRequest(CheckCashRequestMessage checkCashRequestMessage, Inventory inventory)
+    {
+        double balance = inventory.getStartOfDayCash() + inventory.getExecutedCash() - inventory.getReservedCash();
+        double lockCash = checkCashRequestMessage.getLockCash();
+
+        if(balance >= lockCash)
+        {
+            inventory.setReservedCash(inventory.getReservedCash() + lockCash);
+            logger.info(String.format("Successfully locked FULL cash of %f. The inventory is now: %s", lockCash, inventory));
+            return lockCash;
+        }
+
+        if(balance > 0.0 && balance < lockCash)
+        {
+            inventory.setReservedCash(inventory.getReservedCash() + balance);
+            logger.info(String.format("Successfully locked PARTIAL cash of %f. The inventory is now: %s", lockCash, inventory));
+            return balance;
+        }
+
+        logger.error(String.format("Unable to cash lock %d for inventory: ", lockCash, inventory));
+        return  0.0;
+    }
+
+    private double handleCashUnlockRequest(CheckCashRequestMessage checkCashRequestMessage, Inventory inventory)
+    {
+        double unlockCash = checkCashRequestMessage.getUnlockCash();
+        if(inventory.getReservedCash() >= unlockCash)
+        {
+            inventory.setReservedCash(inventory.getReservedCash() - unlockCash);
+            logger.info(String.format("Successfully unlocked FULL cash of %d. The inventory is now: %s", unlockCash, inventory));
+            return unlockCash;
+        }
+        else
+        {
+            logger.error(String.format("For inventory: %s, the reserved cash cannot be less than the unlock cash of %d", inventory, unlockCash));
+            return 0.0;
+        }
     }
 
     private void processPositionCheckRequest(CheckPositionRequestMessage checkPositionRequestMessage)
@@ -136,14 +143,18 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
             result = handlePositionUnlockRequest(checkPositionRequestMessage, inventory);
 
         persistedDisruptorMap.put(key, inventory);
-        logger.info(String.format("Position check request completed for stock: %06d and client: %06d",
-                checkPositionRequestMessage.getInstrumentId(),
-                checkPositionRequestMessage.getClientId()));
+        logger.info(String.format("Completed position check: %s", checkPositionRequestMessage));
     }
 
     private int handlePositionLockRequest(CheckPositionRequestMessage checkPositionRequestMessage, Inventory inventory)
     {
-        int balance = (inventory.getStartOfDayQuantity() + inventory.getBorrowedQuantity() + inventory.getExecutedQuantity()) - inventory.getReservedQuantity();
+        int balance = 0;
+
+        if(RequestTypeEnum.valueOf(checkPositionRequestMessage.getRequestSubType()) == RequestTypeEnum.LONG_AND_SHORT_SELL)
+            balance = (inventory.getStartOfDayQuantity() + inventory.getBorrowedQuantity() + inventory.getExecutedQuantity()) - inventory.getReservedQuantity();
+
+        if(RequestTypeEnum.valueOf(checkPositionRequestMessage.getRequestSubType()) == RequestTypeEnum.LONG_SELL_ONLY)
+            balance = (inventory.getStartOfDayQuantity() + inventory.getExecutedQuantity()) - inventory.getReservedQuantity();
 
         if(balance == 0)
         {
@@ -171,15 +182,16 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
 
     private int handlePositionUnlockRequest(CheckPositionRequestMessage checkPositionRequestMessage, Inventory inventory)
     {
-        if(inventory.getReservedQuantity() >= checkPositionRequestMessage.getUnlockQuantity())
+        int unlockQuantity = checkPositionRequestMessage.getUnlockQuantity();
+        if(inventory.getReservedQuantity() >= unlockQuantity)
         {
-            inventory.setReservedQuantity(inventory.getReservedQuantity() - checkPositionRequestMessage.getUnlockQuantity());
-            logger.info(String.format("Successfully unlocked FULL quantity of %d. The inventory is now: %s", checkPositionRequestMessage.getUnlockQuantity(), inventory));
-            return checkPositionRequestMessage.getUnlockQuantity();
+            inventory.setReservedQuantity(inventory.getReservedQuantity() - unlockQuantity);
+            logger.info(String.format("Successfully unlocked FULL quantity of %d. The inventory is now: %s", unlockQuantity, inventory));
+            return unlockQuantity;
         }
         else
         {
-            logger.error(String.format("For inventory: %s, the reserved quantity cannot be less than the unlock quantity of %d", inventory, checkPositionRequestMessage.getUnlockQuantity()));
+            logger.error(String.format("For inventory: %s, the reserved quantity cannot be less than the unlock quantity of %d", inventory, unlockQuantity));
             return 0;
         }
     }
@@ -189,12 +201,18 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
         String key = String.format("%06d%06d", executionMessage.getInstrumentId(), executionMessage.getClientId());
         Inventory inventory = persistedDisruptorMap.get(key);
 
-        if(executionMessage.getSide() == 'B')
+        if(executionMessage.getSide() != 'B')
+        {
+            Optional<Double> fxRateOptional = fxService.get(executionMessage.getCurrency());
+            if(!fxRateOptional.isPresent())
+                logger.warn("FX rate for currency: %s is missing from FX Service. The default FX rate of 1.0 will be used.");
+            inventory.setExecutedCash(inventory.getExecutedCash() + (executionMessage.getExecutedQuantity() * executionMessage.getExecutedPrice() * fxRateOptional.orElse(Double.valueOf(1.0))));
+        }
+        else
             inventory.setExecutedQuantity(inventory.getExecutedQuantity() + executionMessage.getExecutedQuantity());
-        else //TODO handle FX.
-            inventory.setExecutedCash(inventory.getExecutedCash() + (executionMessage.getExecutedQuantity() * executionMessage.getExecutedPrice()));
 
-        logger.info(String.format("Processed execution message: %s, the current inventory is updated to: %s", executionMessage, printInventory(inventory)));
+
+        logger.info(String.format("Processed execution message: %s, the current inventory is updated to: %s", executionMessage, inventory));
         persistedDisruptorMap.put(key, inventory);
     }
 
@@ -250,9 +268,7 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
             }
 
             final ObjectMapper objectMapper = new ObjectMapper();
-            List<Inventory> positionInventories = objectMapper.readValue(
-                    new File(startOfDayInventoryPositionFilePath),
-                    new TypeReference<List<Inventory>>(){});
+            List<Inventory> positionInventories = objectMapper.readValue(new File(startOfDayInventoryPositionFilePath), new TypeReference<List<Inventory>>(){});
 
             positionInventories.forEach(inventory ->
                     persistedDisruptorMap.put(String.format("%06d%06d",  inventory.getInstrumentId(), inventory.getClientId()), inventory));

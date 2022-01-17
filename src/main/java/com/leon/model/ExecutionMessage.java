@@ -1,6 +1,7 @@
 package com.leon.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Objects;
 
 public class ExecutionMessage
@@ -23,12 +24,15 @@ public class ExecutionMessage
 	private int instrumentId;
 	@JsonProperty("clientId")
 	private int clientId;
+	@JsonProperty("currency")
+	private String currency;
 
 	public ExecutionMessage()
 	{
 	}
 
-	public ExecutionMessage(double executedPrice, int executedQuantity, int cumulativeQuantity, int orderQuantity, char side, String executionId, String orderId, int instrumentId, int clientId)
+	public ExecutionMessage(double executedPrice, int executedQuantity, int cumulativeQuantity, int orderQuantity, char side,
+							String executionId, String orderId, int instrumentId, int clientId, String currency)
 	{
 		this.executedPrice = executedPrice;
 		this.executedQuantity = executedQuantity;
@@ -39,6 +43,7 @@ public class ExecutionMessage
 		this.orderId = orderId;
 		this.instrumentId = instrumentId;
 		this.clientId = clientId;
+		this.currency = currency;
 	}
 
 	public int getExecutedQuantity()
@@ -131,10 +136,20 @@ public class ExecutionMessage
 		this.executedPrice = executedPrice;
 	}
 
+	public String getCurrency()
+	{
+		return currency;
+	}
+
+	public void setCurrency(String currency)
+	{
+		this.currency = currency;
+	}
+
 	@Override
 	public String toString()
 	{
-		return "ExecutionMessage{" + "executedPrice=" + executedPrice + ", executedQuantity=" + executedQuantity + ", cumulativeQuantity=" + cumulativeQuantity + ", orderQuantity=" + orderQuantity + ", side=" + side + ", executionId='" + executionId + ", orderId='" + orderId + ", instrumentId=" + instrumentId + ", clientId=" + clientId + '}';
+		return "ExecutionMessage{" + "executedPrice=" + executedPrice + ", executedQuantity=" + executedQuantity + ", cumulativeQuantity=" + cumulativeQuantity + ", orderQuantity=" + orderQuantity + ", side=" + side + ", executionId='" + executionId + '\'' + ", orderId='" + orderId + '\'' + ", instrumentId=" + instrumentId + ", clientId=" + clientId + ", currency='" + currency + '\'' + '}';
 	}
 
 	@Override
@@ -143,12 +158,12 @@ public class ExecutionMessage
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		ExecutionMessage that = (ExecutionMessage) o;
-		return Double.compare(that.getExecutedPrice(), getExecutedPrice()) == 0 && getExecutedQuantity() == that.getExecutedQuantity() && getCumulativeQuantity() == that.getCumulativeQuantity() && getOrderQuantity() == that.getOrderQuantity() && getSide() == that.getSide() && getInstrumentId() == that.getInstrumentId() && getClientId() == that.getClientId() && getExecutionId().equals(that.getExecutionId()) && getOrderId().equals(that.getOrderId());
+		return Double.compare(that.getExecutedPrice(), getExecutedPrice()) == 0 && getExecutedQuantity() == that.getExecutedQuantity() && getCumulativeQuantity() == that.getCumulativeQuantity() && getOrderQuantity() == that.getOrderQuantity() && getSide() == that.getSide() && getInstrumentId() == that.getInstrumentId() && getClientId() == that.getClientId() && getExecutionId().equals(that.getExecutionId()) && getOrderId().equals(that.getOrderId()) && getCurrency().equals(that.getCurrency());
 	}
 
 	@Override
 	public int hashCode()
 	{
-		return Objects.hash(getExecutedPrice(), getExecutedQuantity(), getCumulativeQuantity(), getOrderQuantity(), getSide(), getExecutionId(), getOrderId(), getInstrumentId(), getClientId());
+		return Objects.hash(getExecutedPrice(), getExecutedQuantity(), getCumulativeQuantity(), getOrderQuantity(), getSide(), getExecutionId(), getOrderId(), getInstrumentId(), getClientId(), getCurrency());
 	}
 }
