@@ -32,10 +32,10 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
             switch (RequestTypeEnum.valueOf(event.getPayload().getPayloadType()))
             {
                 case CASH_CHECK_REQUEST:
-                    double reservedCash = processCashCheckRequest(MessageFactory.createCashCheckRequestMessage(event.getPayload().getPayload()));
+                    processCashCheckRequest(MessageFactory.createCashCheckRequestMessage(event.getPayload().getPayload()));
                     break;
                 case POSITION_CHECK_REQUEST:
-                    int reservedQuantity = processPositionCheckRequest(MessageFactory.createPositionCheckRequestMessage(event.getPayload().getPayload()));
+                    processPositionCheckRequest(MessageFactory.createPositionCheckRequestMessage(event.getPayload().getPayload()));
                     break;
                 case EXECUTION_MESSAGE:
                     processExecution(MessageFactory.createExecutionMessage(event.getPayload().getPayload()));
@@ -47,15 +47,6 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
             logger.error("Event ignored because cannot convert " + event.getPayload().getPayloadType() + " to RequestTypeEnum. Exception thrown: " + e.getLocalizedMessage());
         }
         outboundDisruptor.push(new DisruptorPayload("RESPONSE", "Result is??")); // TODO
-    }
-
-    private String printPositionInventory(Inventory inventory, int lockedQuantity)
-    {
-        return String.format("SOD position quantity: %d, Executed position quantity: %d, Reserved position quantity: %d, Recently locked position quantity: %d",
-                inventory.getStartOfDayQuantity(),
-                inventory.getExecutedQuantity(),
-                inventory.getReservedQuantity(),
-                lockedQuantity);
     }
 
     private String printCashInventory(Inventory inventory, double lockedCash)
@@ -80,12 +71,14 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
 
     private double processCashCheckRequest(CheckCashRequestMessage checkRequestMessage)
     {
+        // TODO Handle FX.
         String key = String.format("%06d%06d", checkRequestMessage.getInstrumentId(), checkRequestMessage.getClientId());
         Inventory inventory = persistedDisruptorMap.get(key);
+
         double balance = inventory.getStartOfDayCash() + inventory.getExecutedCash() - inventory.getReservedCash();
         double lockedCash = 0.0;
 
-        if(balance > checkRequestMessage.getLockCash())
+        if(balance >= checkRequestMessage.getLockCash())
         {
             inventory.setReservedCash(inventory.getReservedCash() + checkRequestMessage.getLockCash());
             lockedCash = checkRequestMessage.getLockCash();
@@ -106,41 +99,76 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
         return lockedCash;
     }
 
-    private int processPositionCheckRequest(CheckStockRequestMessage checkRequestMessage)
+    private void processPositionCheckRequest(CheckPositionRequestMessage checkPositionRequestMessage)
     {
-        String key = String.format("%06d%06d", checkRequestMessage.getInstrumentId(), checkRequestMessage.getClientId());
+        String key = String.format("%06d%06d", checkPositionRequestMessage.getInstrumentId(), checkPositionRequestMessage.getClientId());
         Inventory inventory = persistedDisruptorMap.get(key);
-        int balance = inventory.getStartOfDayQuantity() + inventory.getExecutedQuantity() - inventory.getReservedQuantity();
-        int lockedQuantity = 0;
-        if(balance > checkRequestMessage.getLockQuantity())
-        {
-            inventory.setReservedQuantity(inventory.getReservedQuantity() + checkRequestMessage.getLockQuantity());
-            lockedQuantity = checkRequestMessage.getLockQuantity();
-        }
-        if(balance > 0 && balance < checkRequestMessage.getLockQuantity())
-        {
-            inventory.setReservedQuantity(inventory.getReservedQuantity() + balance);
-            lockedQuantity = balance;
-        }
+        int result = 0;
+
+        if(checkPositionRequestMessage.getLockQuantity() > 0)
+            result = handlePositionLockRequest(checkPositionRequestMessage, inventory);
+        else if(checkPositionRequestMessage.getUnlockQuantity() > 0)
+            result = handlePositionUnlockRequest(checkPositionRequestMessage, inventory);
 
         persistedDisruptorMap.put(key, inventory);
-        logger.info(String.format("Position check completed. For stock: %06d and client: %06d the current position inventory is: %s",
-                checkRequestMessage.getInstrumentId(),
-                checkRequestMessage.getClientId(),
-                printPositionInventory(inventory,
-                lockedQuantity)));
+        logger.info(String.format("Position check request completed for stock: %06d and client: %06d",
+                checkPositionRequestMessage.getInstrumentId(),
+                checkPositionRequestMessage.getClientId()));
+    }
 
-        return lockedQuantity;
+    private int handlePositionLockRequest(CheckPositionRequestMessage checkPositionRequestMessage, Inventory inventory)
+    {
+        int balance = (inventory.getStartOfDayQuantity() + inventory.getBorrowedQuantity() + inventory.getExecutedQuantity()) - inventory.getReservedQuantity();
+
+        if(balance == 0)
+        {
+            logger.error("For inventory: %s, the available position balance is zero - cannot lock quantity of %d", inventory, checkPositionRequestMessage.getLockQuantity());
+            return 0;
+        }
+
+        if(balance >= checkPositionRequestMessage.getLockQuantity())
+        {
+            inventory.setReservedQuantity(inventory.getReservedQuantity() + checkPositionRequestMessage.getLockQuantity());
+            logger.info("Successfully locked FULL quantity of %d. The inventory is now: %s", checkPositionRequestMessage.getLockQuantity(), inventory);
+            return checkPositionRequestMessage.getLockQuantity();
+        }
+
+        if(balance > 0 && balance < checkPositionRequestMessage.getLockQuantity())
+        {
+            inventory.setReservedQuantity(inventory.getReservedQuantity() + balance);
+            logger.info("Successfully locked PARTIAL quantity of %d. The inventory is now: %s", balance, inventory);
+            return balance;
+        }
+
+        logger.error("Unable to lock %d for inventory: ", checkPositionRequestMessage.getLockQuantity(), inventory);
+        return  0;
+    }
+
+    private int handlePositionUnlockRequest(CheckPositionRequestMessage checkPositionRequestMessage, Inventory inventory)
+    {
+        if(inventory.getReservedQuantity() >= checkPositionRequestMessage.getUnlockQuantity())
+        {
+            inventory.setReservedQuantity(inventory.getReservedQuantity() - checkPositionRequestMessage.getUnlockQuantity());
+            logger.info("Successfully unlocked FULL quantity of %d. The inventory is now: %s", checkPositionRequestMessage.getUnlockQuantity(), inventory);
+            return checkPositionRequestMessage.getUnlockQuantity();
+        }
+        else
+        {
+            logger.error("For inventory: %s, the reserved quantity cannot be less than the unlock quantity of %d", inventory, checkPositionRequestMessage.getUnlockQuantity());
+            return 0;
+        }
     }
 
     private void processExecution(ExecutionMessage executionMessage)
     {
         String key = String.format("%06d%06d", executionMessage.getInstrumentId(), executionMessage.getClientId());
         Inventory inventory = persistedDisruptorMap.get(key);
+
         if(executionMessage.getSide() == 'B')
+            inventory.setExecutedQuantity(inventory.getExecutedQuantity() + executionMessage.getExecutedQuantity());
+        else //TODO handle FX.
             inventory.setExecutedCash(inventory.getExecutedCash() + (executionMessage.getExecutedQuantity() * executionMessage.getExecutedPrice()));
-        else
-            inventory.setExecutedQuantity(inventory.getExecutedQuantity() - executionMessage.getExecutedQuantity());
+
         logger.info("Processed execution message: " + executionMessage + ", the current inventory is updated to: " + printInventory(inventory));
         persistedDisruptorMap.put(key, inventory);
     }

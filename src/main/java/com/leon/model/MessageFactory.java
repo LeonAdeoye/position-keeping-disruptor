@@ -36,11 +36,11 @@ public class MessageFactory
 		return null;
 	}
 
-	public static CheckStockRequestMessage createPositionCheckRequestMessage(String payload)
+	public static CheckPositionRequestMessage createPositionCheckRequestMessage(String payload)
 	{
 		try
 		{
-			return objectMapper.readValue(payload, CheckStockRequestMessage.class);
+			return objectMapper.readValue(payload, CheckPositionRequestMessage.class);
 		}
 		catch (JsonProcessingException e)
 		{

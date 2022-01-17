@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Objects;
 
-public class CheckStockRequestMessage
+public class CheckPositionRequestMessage
 {
 	@JsonProperty("lockQuantity")
 	private int lockQuantity;
@@ -17,7 +17,7 @@ public class CheckStockRequestMessage
 	@JsonProperty("requestType")
 	private String requestType;
 
-	public CheckStockRequestMessage(int lockQuantity, int unlockQuantity, int clientId, int instrumentId, String requestType)
+	public CheckPositionRequestMessage(int lockQuantity, int unlockQuantity, int clientId, int instrumentId, String requestType)
 	{
 		this.lockQuantity = lockQuantity;
 		this.unlockQuantity = unlockQuantity;
@@ -26,7 +26,7 @@ public class CheckStockRequestMessage
 		this.requestType = requestType;
 	}
 
-	public CheckStockRequestMessage()
+	public CheckPositionRequestMessage()
 	{
 	}
 
@@ -91,7 +91,7 @@ public class CheckStockRequestMessage
 	{
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
-		CheckStockRequestMessage that = (CheckStockRequestMessage) o;
+		CheckPositionRequestMessage that = (CheckPositionRequestMessage) o;
 		return getLockQuantity() == that.getLockQuantity() && getUnlockQuantity() == that.getUnlockQuantity() && getClientId() == that.getClientId() && getInstrumentId() == that.getInstrumentId() && getRequestType().equals(that.getRequestType());
 	}
 
