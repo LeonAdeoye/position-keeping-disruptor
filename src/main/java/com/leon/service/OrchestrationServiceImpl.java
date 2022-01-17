@@ -28,6 +28,11 @@ public class OrchestrationServiceImpl implements OrchestrationService
     private DisruptorReader requestReader;
     @Autowired
     private DisruptorWriter responseWriter;
+    @Autowired
+    InstrumentService instrumentService;
+    @Autowired
+    FxService fxService;
+
     private BusinessLogicEventHandler businessLogicEventHandler;
     private boolean uploaded = false;
     private boolean stopped = false;
@@ -36,7 +41,7 @@ public class OrchestrationServiceImpl implements OrchestrationService
     @PostConstruct
     public void initialization()
     {
-        businessLogicEventHandler = new BusinessLogicEventHandler(outboundDisruptor);
+        businessLogicEventHandler = new BusinessLogicEventHandler(outboundDisruptor, instrumentService, fxService);
         businessLogicEventHandler.start(configurationService.getChronicleMapFilePath());
         logger.info("Initialization completed.");
         uploaded = true;

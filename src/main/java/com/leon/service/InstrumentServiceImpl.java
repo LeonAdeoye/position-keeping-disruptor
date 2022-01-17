@@ -1,12 +1,14 @@
 package com.leon.service;
 
 import com.leon.model.Instrument;
+import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class InstrumentServiceImpl
+@Service
+public class InstrumentServiceImpl implements InstrumentService
 {
 	Map<Integer, Instrument> instrumentMap = new HashMap<>();
 
@@ -15,26 +17,23 @@ public class InstrumentServiceImpl
 
 	}
 
+	@Override
 	public void put(int instrumentId, Instrument instrument)
 	{
 		instrumentMap.put(instrumentId, instrument);
 	}
 
+	@Override
 	public Optional<Instrument> get(int instrumentId)
 	{
-		Instrument result = instrumentMap.get(instrumentId);
-		if(result == null)
-			return Optional.empty();
-		else
-			return Optional.of(result);
+		return Optional.ofNullable(instrumentMap.get(instrumentId));
 	}
 
+	@Override
 	public Optional<Instrument> get(String bloombergCode)
 	{
-		Optional<Instrument> matchingInstrument = instrumentMap.values().stream().
+		return instrumentMap.values().stream().
 				filter(instrument -> instrument.getBloombergCode().equals(bloombergCode)).
 				findFirst();
-
-		return matchingInstrument;
 	}
 }

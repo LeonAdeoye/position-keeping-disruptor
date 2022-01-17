@@ -1,7 +1,6 @@
 package com.leon.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Objects;
 
 public class CheckPositionRequestMessage
@@ -16,14 +15,18 @@ public class CheckPositionRequestMessage
 	private int instrumentId;
 	@JsonProperty("requestType")
 	private String requestType;
+	@JsonProperty("requestSubType")
+	private String requestSubType;
 
-	public CheckPositionRequestMessage(int lockQuantity, int unlockQuantity, int clientId, int instrumentId, String requestType)
+
+	public CheckPositionRequestMessage(int lockQuantity, int unlockQuantity, int clientId, int instrumentId, String requestType, String requestSubType)
 	{
 		this.lockQuantity = lockQuantity;
 		this.unlockQuantity = unlockQuantity;
 		this.clientId = clientId;
 		this.instrumentId = instrumentId;
 		this.requestType = requestType;
+		this.requestSubType = requestSubType;
 	}
 
 	public CheckPositionRequestMessage()
@@ -80,10 +83,14 @@ public class CheckPositionRequestMessage
 		this.requestType = requestType;
 	}
 
-	@Override
-	public String toString()
+	public String getRequestSubType()
 	{
-		return "CheckStockRequestMessage{" + "lockQuantity=" + lockQuantity + ", unlockQuantity=" + unlockQuantity + ", clientId=" + clientId + ", instrumentId=" + instrumentId  + ", requestType=" + requestType + "}";
+		return requestSubType;
+	}
+
+	public void setRequestSubType(String requestSubType)
+	{
+		this.requestSubType = requestSubType;
 	}
 
 	@Override
@@ -92,12 +99,18 @@ public class CheckPositionRequestMessage
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		CheckPositionRequestMessage that = (CheckPositionRequestMessage) o;
-		return getLockQuantity() == that.getLockQuantity() && getUnlockQuantity() == that.getUnlockQuantity() && getClientId() == that.getClientId() && getInstrumentId() == that.getInstrumentId() && getRequestType().equals(that.getRequestType());
+		return getLockQuantity() == that.getLockQuantity() && getUnlockQuantity() == that.getUnlockQuantity() && getClientId() == that.getClientId() && getInstrumentId() == that.getInstrumentId() && getRequestType().equals(that.getRequestType()) && getRequestSubType().equals(that.getRequestSubType());
 	}
 
 	@Override
 	public int hashCode()
 	{
-		return Objects.hash(getLockQuantity(), getUnlockQuantity(), getClientId(), getInstrumentId(), getRequestType());
+		return Objects.hash(getLockQuantity(), getUnlockQuantity(), getClientId(), getInstrumentId(), getRequestType(), getRequestSubType());
+	}
+
+	@Override
+	public String toString()
+	{
+		return "CheckPositionRequestMessage{" + "lockQuantity=" + lockQuantity + ", unlockQuantity=" + unlockQuantity + ", clientId=" + clientId + ", instrumentId=" + instrumentId + ", requestType='" + requestType + '\'' + ", requestSubType='" + requestSubType + '\'' + '}';
 	}
 }

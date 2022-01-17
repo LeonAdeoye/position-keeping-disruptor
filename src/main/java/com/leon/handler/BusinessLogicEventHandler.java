@@ -4,11 +4,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.leon.model.*;
 import com.leon.service.DisruptorService;
+import com.leon.service.FxService;
+import com.leon.service.InstrumentService;
 import com.lmax.disruptor.EventHandler;
 import net.openhft.chronicle.map.ChronicleMap;
 import net.openhft.chronicle.map.ChronicleMapBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -18,11 +21,36 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
 {
     private static final Logger logger = LoggerFactory.getLogger(BusinessLogicEventHandler.class);
     private DisruptorService outboundDisruptor;
+    private InstrumentService instrumentService;
+    private FxService fxService;
     private  ChronicleMap<String, Inventory> persistedDisruptorMap;
 
-    public BusinessLogicEventHandler(DisruptorService outboundDisruptor)
+    public BusinessLogicEventHandler(DisruptorService outboundDisruptor, InstrumentService instrumentService, FxService fxService)
     {
-        this.outboundDisruptor = outboundDisruptor;
+        if(instrumentService == null)
+        {
+            logger.error("Instrument service is invalid.");
+            throw new NullPointerException("Instrument service is invalid.");
+        }
+        else
+            this.instrumentService = instrumentService;
+
+
+        if(fxService == null)
+        {
+            logger.error("Fx service is invalid.");
+            throw new NullPointerException("Fx service is invalid.");
+        }
+        else
+            this.fxService = fxService;
+
+        if(outboundDisruptor == null)
+        {
+            logger.error("Outbound disruptor is invalid.");
+            throw new NullPointerException("Outbound disruptor is invalid.");
+        }
+        else
+            this.outboundDisruptor = outboundDisruptor;
     }
 
     public void onEvent(DisruptorEvent event, long sequence, boolean endOfBatch)
@@ -91,10 +119,7 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
 
         persistedDisruptorMap.put(key, inventory);
         logger.info(String.format("Cash checked completed. For stock: %06d and client: %06d the current cash inventory is: %s",
-                checkRequestMessage.getInstrumentId(),
-                checkRequestMessage.getClientId(),
-                printCashInventory(inventory,
-                lockedCash)));
+                checkRequestMessage.getInstrumentId(), checkRequestMessage.getClientId(), printCashInventory(inventory, lockedCash)));
 
         return lockedCash;
     }
@@ -122,25 +147,25 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
 
         if(balance == 0)
         {
-            logger.error("For inventory: %s, the available position balance is zero - cannot lock quantity of %d", inventory, checkPositionRequestMessage.getLockQuantity());
+            logger.error(String.format("For inventory: %s, the available position balance is zero - cannot lock quantity of %d", inventory, checkPositionRequestMessage.getLockQuantity()));
             return 0;
         }
 
         if(balance >= checkPositionRequestMessage.getLockQuantity())
         {
             inventory.setReservedQuantity(inventory.getReservedQuantity() + checkPositionRequestMessage.getLockQuantity());
-            logger.info("Successfully locked FULL quantity of %d. The inventory is now: %s", checkPositionRequestMessage.getLockQuantity(), inventory);
+            logger.info(String.format("Successfully locked FULL quantity of %d. The inventory is now: %s", checkPositionRequestMessage.getLockQuantity(), inventory));
             return checkPositionRequestMessage.getLockQuantity();
         }
 
         if(balance > 0 && balance < checkPositionRequestMessage.getLockQuantity())
         {
             inventory.setReservedQuantity(inventory.getReservedQuantity() + balance);
-            logger.info("Successfully locked PARTIAL quantity of %d. The inventory is now: %s", balance, inventory);
+            logger.info(String.format("Successfully locked PARTIAL quantity of %d. The inventory is now: %s", balance, inventory));
             return balance;
         }
 
-        logger.error("Unable to lock %d for inventory: ", checkPositionRequestMessage.getLockQuantity(), inventory);
+        logger.error(String.format("Unable to lock %d for inventory: ", checkPositionRequestMessage.getLockQuantity(), inventory));
         return  0;
     }
 
@@ -149,12 +174,12 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
         if(inventory.getReservedQuantity() >= checkPositionRequestMessage.getUnlockQuantity())
         {
             inventory.setReservedQuantity(inventory.getReservedQuantity() - checkPositionRequestMessage.getUnlockQuantity());
-            logger.info("Successfully unlocked FULL quantity of %d. The inventory is now: %s", checkPositionRequestMessage.getUnlockQuantity(), inventory);
+            logger.info(String.format("Successfully unlocked FULL quantity of %d. The inventory is now: %s", checkPositionRequestMessage.getUnlockQuantity(), inventory));
             return checkPositionRequestMessage.getUnlockQuantity();
         }
         else
         {
-            logger.error("For inventory: %s, the reserved quantity cannot be less than the unlock quantity of %d", inventory, checkPositionRequestMessage.getUnlockQuantity());
+            logger.error(String.format("For inventory: %s, the reserved quantity cannot be less than the unlock quantity of %d", inventory, checkPositionRequestMessage.getUnlockQuantity()));
             return 0;
         }
     }
@@ -169,7 +194,7 @@ public class BusinessLogicEventHandler implements EventHandler<DisruptorEvent>
         else //TODO handle FX.
             inventory.setExecutedCash(inventory.getExecutedCash() + (executionMessage.getExecutedQuantity() * executionMessage.getExecutedPrice()));
 
-        logger.info("Processed execution message: " + executionMessage + ", the current inventory is updated to: " + printInventory(inventory));
+        logger.info(String.format("Processed execution message: %s, the current inventory is updated to: %s", executionMessage, printInventory(inventory)));
         persistedDisruptorMap.put(key, inventory);
     }
 
