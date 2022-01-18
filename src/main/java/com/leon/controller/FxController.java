@@ -1,11 +1,12 @@
 package com.leon.controller;
 
+import com.leon.model.FxRate;
 import com.leon.service.FxService;
+import com.leon.service.FxServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,22 +20,23 @@ public class FxController
 
 	@CrossOrigin
 	@RequestMapping(value = "/add", method = RequestMethod.POST)
-	public void add()
+	public void add(@RequestBody FxRate fxRate)
 	{
 		logger.info("Received request to add FX rate: ");
+		fxService.put(fxRate.getCurrency(), fxRate.getFxRateAgainstUSD());
 	}
 
 	@CrossOrigin
 	@RequestMapping(value = "/get", method = RequestMethod.GET)
-	public double get(@RequestParam String currency)
+	public FxRate get(@RequestParam String currency)
 	{
 		logger.info("Received request get the Fx rate for " + currency);
-		return 0.0;
+		return fxService.get(currency).orElse(FxServiceImpl.defaultUSDRate);
 	}
 
 	@CrossOrigin
 	@RequestMapping(value = "/getAll", method = RequestMethod.GET)
-	public List<String> get()
+	public List<FxRate> get()
 	{
 		logger.info("Received request get all FX rates.");
 		return new ArrayList<>();
@@ -42,9 +44,9 @@ public class FxController
 
 	@CrossOrigin
 	@RequestMapping(value = "/update", method = RequestMethod.PUT)
-	public void update(@RequestParam String currency, @RequestParam double fxRate)
+	public void update(@RequestBody FxRate fxRate)
 	{
-		logger.info("Received request to update FX rate: ");
+		logger.info("Received request to update FX rate: " + fxRate);
 	}
 
 	@CrossOrigin

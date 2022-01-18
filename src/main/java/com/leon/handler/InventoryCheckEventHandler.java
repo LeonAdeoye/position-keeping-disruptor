@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.leon.model.*;
 import com.leon.service.DisruptorService;
 import com.leon.service.FxService;
+import com.leon.service.FxServiceImpl;
 import com.leon.service.InstrumentService;
 import com.lmax.disruptor.EventHandler;
 import net.openhft.chronicle.map.ChronicleMap;
@@ -250,10 +251,10 @@ public class InventoryCheckEventHandler implements EventHandler<DisruptorEvent>
 
         if(executionMessage.getSide() != 'B')
         {
-            Optional<Double> fxRateOptional = fxService.get(executionMessage.getCurrency());
+            Optional<FxRate> fxRateOptional = fxService.get(executionMessage.getCurrency());
             if(!fxRateOptional.isPresent())
                 logger.warn("FX rate for currency: %s is missing from FX Service. The default FX rate of 1.0 will be used.");
-            inventory.setExecutedCash(inventory.getExecutedCash() + (executionMessage.getExecutedQuantity() * executionMessage.getExecutedPrice() * fxRateOptional.orElse(Double.valueOf(1.0))));
+            inventory.setExecutedCash(inventory.getExecutedCash() + (executionMessage.getExecutedQuantity() * executionMessage.getExecutedPrice() * fxRateOptional.orElse(FxServiceImpl.defaultUSDRate).getFxRateAgainstUSD()));
         }
         else
             inventory.setExecutedQuantity(inventory.getExecutedQuantity() + executionMessage.getExecutedQuantity());
