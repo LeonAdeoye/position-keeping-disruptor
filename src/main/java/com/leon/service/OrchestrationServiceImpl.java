@@ -1,6 +1,6 @@
 package com.leon.service;
 
-import com.leon.handler.BusinessLogicEventHandler;
+import com.leon.handler.InventoryCheckEventHandler;
 import com.leon.handler.InboundJournalEventHandler;
 import com.leon.handler.OutboundJournalEventHandler;
 import com.leon.handler.PublishingEventHandler;
@@ -33,7 +33,7 @@ public class OrchestrationServiceImpl implements OrchestrationService
     @Autowired
     FxService fxService;
 
-    private BusinessLogicEventHandler businessLogicEventHandler;
+    private InventoryCheckEventHandler inventoryCheckEventHandler;
     private boolean uploaded = false;
     private boolean stopped = false;
     private boolean started = false;
@@ -41,8 +41,8 @@ public class OrchestrationServiceImpl implements OrchestrationService
     @PostConstruct
     public void initialization()
     {
-        businessLogicEventHandler = new BusinessLogicEventHandler(outboundDisruptor, instrumentService, fxService);
-        businessLogicEventHandler.start(configurationService.getChronicleMapFilePath());
+        inventoryCheckEventHandler = new InventoryCheckEventHandler(outboundDisruptor, instrumentService, fxService);
+        inventoryCheckEventHandler.start(configurationService.getChronicleMapFilePath());
         logger.info("Initialization completed.");
         uploaded = true;
 
@@ -55,7 +55,7 @@ public class OrchestrationServiceImpl implements OrchestrationService
         {
             requestReader.start(configurationService.getReaderFilePath());
             responseWriter.start(configurationService);
-            inboundDisruptor.start("INBOUND", new InboundJournalEventHandler(), businessLogicEventHandler);
+            inboundDisruptor.start("INBOUND", new InboundJournalEventHandler(), inventoryCheckEventHandler);
             outboundDisruptor.start("OUTBOUND", new OutboundJournalEventHandler(), new PublishingEventHandler(responseWriter) );
             requestReader.readAll().subscribe((request) -> inboundDisruptor.push(request));
             uploaded = false;
@@ -71,7 +71,7 @@ public class OrchestrationServiceImpl implements OrchestrationService
     {
         if(!stopped)
         {
-            businessLogicEventHandler.stop();
+            inventoryCheckEventHandler.stop();
             inboundDisruptor.stop();
             outboundDisruptor.stop();
             requestReader.stop();
@@ -84,12 +84,14 @@ public class OrchestrationServiceImpl implements OrchestrationService
             logger.error("Cannot stop components because they have already been stopped.");
     }
 
+    // TODO - system needs to be able to reload SOD positions at anytime.
+
     @Override
     public void upload(String sodFilePath)
     {
-        if(businessLogicEventHandler != null && uploaded)
+        if(inventoryCheckEventHandler != null && uploaded)
         {
-            businessLogicEventHandler.uploadSODPositions(sodFilePath);
+            inventoryCheckEventHandler.uploadSODPositions(sodFilePath);
             uploaded = false;
         }
         else

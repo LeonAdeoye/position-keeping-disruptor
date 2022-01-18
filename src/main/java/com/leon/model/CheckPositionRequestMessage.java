@@ -13,18 +13,22 @@ public class CheckPositionRequestMessage
 	private int clientId;
 	@JsonProperty("instrumentId")
 	private int instrumentId;
+	@JsonProperty("referenceId")
+	private String referenceId;
 	@JsonProperty("requestType")
 	private String requestType;
 	@JsonProperty("requestSubType")
 	private String requestSubType;
 
 
-	public CheckPositionRequestMessage(int lockQuantity, int unlockQuantity, int clientId, int instrumentId, String requestType, String requestSubType)
+
+	public CheckPositionRequestMessage(int lockQuantity, int unlockQuantity, int clientId, int instrumentId, String referenceId, String requestType, String requestSubType)
 	{
 		this.lockQuantity = lockQuantity;
 		this.unlockQuantity = unlockQuantity;
 		this.clientId = clientId;
 		this.instrumentId = instrumentId;
+		this.referenceId = referenceId;
 		this.requestType = requestType;
 		this.requestSubType = requestSubType;
 	}
@@ -93,24 +97,35 @@ public class CheckPositionRequestMessage
 		this.requestSubType = requestSubType;
 	}
 
+	public String getReferenceId()
+	{
+		return referenceId;
+	}
+
+	public void setReferenceId(String referenceId)
+	{
+		this.referenceId = referenceId;
+	}
+
 	@Override
 	public boolean equals(Object o)
 	{
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		CheckPositionRequestMessage that = (CheckPositionRequestMessage) o;
-		return getLockQuantity() == that.getLockQuantity() && getUnlockQuantity() == that.getUnlockQuantity() && getClientId() == that.getClientId() && getInstrumentId() == that.getInstrumentId() && getRequestType().equals(that.getRequestType()) && getRequestSubType().equals(that.getRequestSubType());
+		return getLockQuantity() == that.getLockQuantity() && getUnlockQuantity() == that.getUnlockQuantity() && getClientId() == that.getClientId() && getReferenceId().equals(that.getReferenceId())
+				&& getInstrumentId() == that.getInstrumentId() && getRequestType().equals(that.getRequestType()) && getRequestSubType().equals(that.getRequestSubType());
 	}
 
 	@Override
 	public int hashCode()
 	{
-		return Objects.hash(getLockQuantity(), getUnlockQuantity(), getClientId(), getInstrumentId(), getRequestType(), getRequestSubType());
+		return Objects.hash(getLockQuantity(), getUnlockQuantity(), getClientId(), getInstrumentId(), getRequestType(), getRequestSubType(), getReferenceId());
 	}
 
 	@Override
 	public String toString()
 	{
-		return "CheckPositionRequestMessage{" + "lockQuantity=" + lockQuantity + ", unlockQuantity=" + unlockQuantity + ", clientId=" + clientId + ", instrumentId=" + instrumentId + ", requestType='" + requestType + '\'' + ", requestSubType='" + requestSubType + '\'' + '}';
+		return "CheckPositionRequestMessage{" + "lockQuantity=" + lockQuantity + ", unlockQuantity=" + unlockQuantity + ", clientId=" + clientId + ", instrumentId=" + instrumentId + ", referenceId='" + referenceId + '\'' + ", requestType='" + requestType + '\'' + ", requestSubType='" + requestSubType + '\'' + '}';
 	}
 }

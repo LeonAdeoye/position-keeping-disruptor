@@ -1,54 +1,63 @@
 package com.leon.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.UUID;
 import java.util.Objects;
 
 public class InventoryCheckResponse
 {
-	private int reservedQuantity;
-	private int outstandingQuantity;
+	@JsonProperty("lockQuantity")
+	private int lockedQuantity;
+	@JsonProperty("unlockedQuantity")
+	private int unlockedQuantity;
+	@JsonProperty("result")
 	private String result;
-	private String orderId;
+	@JsonProperty("referenceId")
+	private String referenceId;
+	@JsonProperty("clientId")
 	private int clientId;
+	@JsonProperty("instrumentId")
 	private int instrumentId;
-	private char side;
-	private double reservedCash;
-	private double outstandingCash;
+	@JsonProperty("lockedCash")
+	private double lockedCash;
+	@JsonProperty("unlockedCash")
+	private double unlockedCash;
+	@JsonProperty("requestType")
 	private String requestType;
+	@JsonProperty("requestSubType")
+	private String requestSubType;
+	@JsonProperty("uid")
+	private String uid;
 
-	public InventoryCheckResponse(int reservedQuantity, int outstandingQuantity, String result, String orderId, int clientId, int instrumentId, char side, double reservedCash, double outstandingCash, String requestType)
+
+	public InventoryCheckResponse(int lockedQuantity, int unlockedQuantity, String result, String referenceId, int clientId, int instrumentId, double lockedCash, double unlockedCash, String requestType, String requestSubType)
 	{
-		this.reservedQuantity = reservedQuantity;
-		this.outstandingQuantity = outstandingQuantity;
+		this.lockedQuantity = lockedQuantity;
+		this.unlockedQuantity = unlockedQuantity;
 		this.result = result;
-		this.orderId = orderId;
+		this.referenceId = referenceId;
 		this.clientId = clientId;
 		this.instrumentId = instrumentId;
-		this.side = side;
-		this.reservedCash = reservedCash;
-		this.outstandingCash = outstandingCash;
+		this.lockedCash = lockedCash;
+		this.unlockedCash = unlockedCash;
 		this.requestType = requestType;
+		this.requestSubType = requestSubType;
+		this.uid = UUID.randomUUID().toString();
 	}
 
-	public InventoryCheckResponse()	{}
-
-	public int getReservedQuantity()
+	public InventoryCheckResponse()
 	{
-		return reservedQuantity;
+		this.uid = UUID.randomUUID().toString();
 	}
 
-	public void setReservedQuantity(int reservedQuantity)
+	public int getLockedQuantity()
 	{
-		this.reservedQuantity = reservedQuantity;
+		return lockedQuantity;
 	}
 
-	public int getOutstandingQuantity()
+	public void setLockedQuantity(int lockedQuantity)
 	{
-		return outstandingQuantity;
-	}
-
-	public void setOutstandingQuantity(int outstandingQuantity)
-	{
-		this.outstandingQuantity = outstandingQuantity;
+		this.lockedQuantity = lockedQuantity;
 	}
 
 	public String getResult()
@@ -61,14 +70,14 @@ public class InventoryCheckResponse
 		this.result = result;
 	}
 
-	public String getOrderId()
+	public String getReferenceId()
 	{
-		return orderId;
+		return referenceId;
 	}
 
-	public void setOrderId(String orderId)
+	public void setReferenceId(String referenceId)
 	{
-		this.orderId = orderId;
+		this.referenceId = referenceId;
 	}
 
 	public int getClientId()
@@ -91,34 +100,14 @@ public class InventoryCheckResponse
 		this.instrumentId = instrumentId;
 	}
 
-	public char getSide()
+	public double getLockedCash()
 	{
-		return side;
+		return lockedCash;
 	}
 
-	public void setSide(char side)
+	public void setLockedCash(double lockedCash)
 	{
-		this.side = side;
-	}
-
-	public double getReservedCash()
-	{
-		return reservedCash;
-	}
-
-	public void setReservedCash(double reservedCash)
-	{
-		this.reservedCash = reservedCash;
-	}
-
-	public double getOutstandingCash()
-	{
-		return outstandingCash;
-	}
-
-	public void setOutstandingCash(double outstandingCash)
-	{
-		this.outstandingCash = outstandingCash;
+		this.lockedCash = lockedCash;
 	}
 
 	public String getRequestType()
@@ -131,10 +120,44 @@ public class InventoryCheckResponse
 		this.requestType = requestType;
 	}
 
-	@Override
-	public String toString()
+	public String getRequestSubType()
 	{
-		return "InventoryCheckResponse{" + "reservedQuantity=" + reservedQuantity + ", outstandingQuantity=" + outstandingQuantity + ", result='" + result + ", orderId='" + orderId + ", clientId=" + clientId + ", instrumentId='" + instrumentId + ", side=" + side + ", reservedCash=" + reservedCash + ", outstandingCash=" + outstandingCash + ", requestType='" + requestType + ", requestSubType='" + '}';
+		return requestSubType;
+	}
+
+	public void setRequestSubType(String requestSubType)
+	{
+		this.requestSubType = requestSubType;
+	}
+
+	public int getUnlockedQuantity()
+	{
+		return unlockedQuantity;
+	}
+
+	public void setUnlockedQuantity(int unlockedQuantity)
+	{
+		this.unlockedQuantity = unlockedQuantity;
+	}
+
+	public double getUnlockedCash()
+	{
+		return unlockedCash;
+	}
+
+	public void setUnlockedCash(double unlockedCash)
+	{
+		this.unlockedCash = unlockedCash;
+	}
+
+	public String getUid()
+	{
+		return uid;
+	}
+
+	public void setUid(String uid)
+	{
+		this.uid = uid;
 	}
 
 	@Override
@@ -143,12 +166,22 @@ public class InventoryCheckResponse
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		InventoryCheckResponse that = (InventoryCheckResponse) o;
-		return getReservedQuantity() == that.getReservedQuantity() && getOutstandingQuantity() == that.getOutstandingQuantity() && getClientId() == that.getClientId() && getSide() == that.getSide() && Double.compare(that.getReservedCash(), getReservedCash()) == 0 && Double.compare(that.getOutstandingCash(), getOutstandingCash()) == 0 && getResult().equals(that.getResult()) && getOrderId().equals(that.getOrderId()) && getInstrumentId() == that.getInstrumentId() && getRequestType().equals(that.getRequestType());
+		return getLockedQuantity() == that.getLockedQuantity() && getClientId() == that.getClientId() && Double.compare(that.getLockedCash(), getLockedCash()) == 0
+				&& getResult().equals(that.getResult()) && getReferenceId().equals(that.getReferenceId()) && getInstrumentId() == that.getInstrumentId()
+				&& getRequestType().equals(that.getRequestType()) && getRequestSubType().equals(that.getRequestSubType()) && getUnlockedQuantity() == that.getUnlockedQuantity()
+				&& Double.compare(that.getUnlockedCash(), getUnlockedCash()) == 0 && getUid().equals(that.getUid());
 	}
 
 	@Override
 	public int hashCode()
 	{
-		return Objects.hash(getReservedQuantity(), getOutstandingQuantity(), getResult(), getOrderId(), getClientId(), getInstrumentId(), getSide(), getReservedCash(), getOutstandingCash(), getRequestType());
+		return Objects.hash(getLockedQuantity(), getResult(), getReferenceId(), getClientId(), getUnlockedCash(),
+				getInstrumentId(), getLockedCash(), getRequestType(), getRequestSubType(), getUnlockedQuantity(), getUid());
+	}
+
+	@Override
+	public String toString()
+	{
+		return "InventoryCheckResponse{" + "lockedQuantity=" + lockedQuantity + ", unlockedQuantity=" + unlockedQuantity + ", result='" + result + '\'' + ", referenceId='" + referenceId + '\'' + ", clientId=" + clientId + ", instrumentId=" + instrumentId + ", lockedCash=" + lockedCash + ", unlockedCash=" + unlockedCash + ", requestType='" + requestType + '\'' + ", requestSubType='" + requestSubType + '\'' + ", uid='" + uid + '\'' + '}';
 	}
 }

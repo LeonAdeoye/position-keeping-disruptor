@@ -1,16 +1,18 @@
 package com.leon.controller;
 
+import com.leon.model.Inventory;
 import com.leon.service.OrchestrationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 @RestController
+@RequestMapping("/orchestrate")
 public class OrchestrationController
 {
     private static final Logger logger = LoggerFactory.getLogger(OrchestrationController.class);
@@ -52,5 +54,20 @@ public class OrchestrationController
 
         logger.info("Received request to upload SOD file: " + file);
         orchestrationService.upload(file);
+    }
+
+    @CrossOrigin
+    @RequestMapping(value = "/getAll")
+    public List<Inventory> getAll()
+    {
+        logger.info("Received request to get all inventories.");
+        return new ArrayList<>();
+    }
+
+    @CrossOrigin
+    @RequestMapping(value = "/update")
+    public void update(@RequestBody Inventory inventory)
+    {
+        logger.info("Received request to update inventory: " + inventory);
     }
 }
