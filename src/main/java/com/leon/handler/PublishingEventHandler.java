@@ -1,12 +1,11 @@
 package com.leon.handler;
 
 import com.leon.io.DisruptorWriter;
+import com.leon.model.DisruptorEvent;
 import com.leon.model.DisruptorPayload;
 import com.lmax.disruptor.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.leon.model.DisruptorEvent;
-import reactor.core.publisher.Mono;
 
 public class PublishingEventHandler implements EventHandler<DisruptorEvent>
 {
@@ -23,8 +22,7 @@ public class PublishingEventHandler implements EventHandler<DisruptorEvent>
         DisruptorPayload payload = event.getPayload();
         if(payload != null)
         {
-            logger.debug(payload.toString());
-            writer.write(Mono.just(payload));
+            logger.info(payload.toString());
         }
     }
 }

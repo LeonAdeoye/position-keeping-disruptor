@@ -1,5 +1,6 @@
 package com.leon.handler;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.leon.model.*;
@@ -59,15 +60,19 @@ public class InventoryCheckEventHandler implements EventHandler<DisruptorEvent>
 
     public void onEvent(DisruptorEvent event, long sequence, boolean endOfBatch)
     {
+        String result = "";
         try
         {
+            ObjectMapper mapper = new ObjectMapper();
             switch (RequestTypeEnum.valueOf(event.getPayload().getPayloadType()))
             {
                 case CASH_CHECK_REQUEST:
-                    processCashCheckRequest(MessageFactory.createCashCheckRequestMessage(event.getPayload().getPayload()));
+                    result = mapper.writeValueAsString(processCashCheckRequest(MessageFactory.createCashCheckRequestMessage(event.getPayload().getPayload())));
+                    outboundDisruptor.push(new DisruptorPayload("CASH_CHECK_REQUEST_RESPONSE", result));
                     break;
                 case POSITION_CHECK_REQUEST:
-                    processPositionCheckRequest(MessageFactory.createPositionCheckRequestMessage(event.getPayload().getPayload()));
+                    result = mapper.writeValueAsString(processPositionCheckRequest(MessageFactory.createPositionCheckRequestMessage(event.getPayload().getPayload())));
+                    outboundDisruptor.push(new DisruptorPayload("POSITION_CHECK_REQUEST_RESPONSE", result));
                     break;
                 case EXECUTION_MESSAGE:
                     processExecution(MessageFactory.createExecutionMessage(event.getPayload().getPayload()));
@@ -75,10 +80,12 @@ public class InventoryCheckEventHandler implements EventHandler<DisruptorEvent>
         }
         catch(IllegalArgumentException e)
         {
-            e.printStackTrace();
             logger.error("Event ignored because cannot convert " + event.getPayload().getPayloadType() + " to RequestTypeEnum. Exception thrown: " + e.getLocalizedMessage());
         }
-        outboundDisruptor.push(new DisruptorPayload("RESPONSE", "Result is??"));
+        catch (JsonProcessingException e)
+        {
+            logger.error("Event ignored because cannot convert " + event.getPayload().getPayload() + " to JSON. Exception thrown: " + e.getLocalizedMessage());
+        }
     }
 
     private InventoryCheckResponse processPositionCheckRequest(CheckPositionRequestMessage checkPositionRequestMessage)
