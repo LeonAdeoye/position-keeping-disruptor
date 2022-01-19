@@ -14,11 +14,13 @@ import net.openhft.chronicle.map.ChronicleMap;
 import net.openhft.chronicle.map.ChronicleMapBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class InventoryCheckEventHandler implements EventHandler<DisruptorEvent>
 {
@@ -328,5 +330,10 @@ public class InventoryCheckEventHandler implements EventHandler<DisruptorEvent>
         {
             logger.error(ioe.getLocalizedMessage());
         }
+    }
+
+    public List<Inventory> getInventory()
+    {
+        return this.persistedDisruptorMap.values().stream().collect(Collectors.toList());
     }
 }

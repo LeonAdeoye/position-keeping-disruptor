@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -57,11 +56,11 @@ public class OrchestrationController
     }
 
     @CrossOrigin
-    @RequestMapping(value = "/getAll")
-    public List<Inventory> getAll()
+    @RequestMapping(value = "/getInventory")
+    public List<Inventory> getInventory()
     {
-        logger.info("Received request to get all inventories.");
-        return new ArrayList<>();
+        logger.info("Received request to get all inventory items.");
+        return orchestrationService.getInventory();
     }
 
     @CrossOrigin

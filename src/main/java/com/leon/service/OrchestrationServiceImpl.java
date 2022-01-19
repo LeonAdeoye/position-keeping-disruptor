@@ -6,12 +6,15 @@ import com.leon.handler.OutboundJournalEventHandler;
 import com.leon.handler.PublishingEventHandler;
 import com.leon.io.DisruptorReader;
 import com.leon.io.DisruptorWriter;
+import com.leon.model.Inventory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class OrchestrationServiceImpl implements OrchestrationService
@@ -96,5 +99,11 @@ public class OrchestrationServiceImpl implements OrchestrationService
         }
         else
             logger.error("Cannot upload SOD file because orchestration service is not in the right state.");
+    }
+
+    @Override
+    public List<Inventory> getInventory()
+    {
+        return inventoryCheckEventHandler == null ? new ArrayList<>() : inventoryCheckEventHandler.getInventory();
     }
 }
