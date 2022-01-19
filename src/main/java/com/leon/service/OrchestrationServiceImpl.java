@@ -35,6 +35,8 @@ public class OrchestrationServiceImpl implements OrchestrationService
     InstrumentService instrumentService;
     @Autowired
     FxService fxService;
+    @Autowired
+    ActiveMQConfigurationServiceImpl activeMQConfigurationService;
 
     private InventoryCheckEventHandler inventoryCheckEventHandler;
     private boolean uploaded = false;
@@ -58,7 +60,8 @@ public class OrchestrationServiceImpl implements OrchestrationService
             requestReader.start(configurationService.getReaderFilePath());
             responseWriter.start(configurationService);
             inboundDisruptor.start("INBOUND", new InboundJournalEventHandler(), inventoryCheckEventHandler);
-            outboundDisruptor.start("OUTBOUND", new OutboundJournalEventHandler(), new PublishingEventHandler(responseWriter) );
+            outboundDisruptor.start("OUTBOUND", new OutboundJournalEventHandler(),
+                    new PublishingEventHandler(responseWriter, activeMQConfigurationService.getPositionCheckResponseTopic()));
             requestReader.readAll().subscribe((request) -> inboundDisruptor.push(request));
             uploaded = false;
             started = true;
