@@ -1,6 +1,8 @@
 package com.leon.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.Objects;
 
@@ -28,7 +30,8 @@ public class InventoryCheckResponse
 	private String requestSubType;
 	@JsonProperty("uid")
 	private String uid;
-
+	@JsonProperty("createdTimestamp")
+	private LocalDateTime createdTimestamp;
 
 	public InventoryCheckResponse(int lockedQuantity, int unlockedQuantity, String result, String referenceId, int clientId, int instrumentId, double lockedCash, double unlockedCash, String requestType, String requestSubType)
 	{
@@ -43,6 +46,7 @@ public class InventoryCheckResponse
 		this.requestType = requestType;
 		this.requestSubType = requestSubType;
 		this.uid = UUID.randomUUID().toString();
+		this.createdTimestamp = LocalDateTime.now();
 	}
 
 	public InventoryCheckResponse()
@@ -160,28 +164,40 @@ public class InventoryCheckResponse
 		this.uid = uid;
 	}
 
+	public LocalDateTime getCreatedTimestamp()
+	{
+		return createdTimestamp;
+	}
+
+	public void setCreatedTimestamp(LocalDateTime createdTimestamp)
+	{
+		this.createdTimestamp = createdTimestamp;
+	}
+
 	@Override
 	public boolean equals(Object o)
 	{
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		InventoryCheckResponse that = (InventoryCheckResponse) o;
-		return getLockedQuantity() == that.getLockedQuantity() && getClientId() == that.getClientId() && Double.compare(that.getLockedCash(), getLockedCash()) == 0
-				&& getResult().equals(that.getResult()) && getReferenceId().equals(that.getReferenceId()) && getInstrumentId() == that.getInstrumentId()
-				&& getRequestType().equals(that.getRequestType()) && getRequestSubType().equals(that.getRequestSubType()) && getUnlockedQuantity() == that.getUnlockedQuantity()
-				&& Double.compare(that.getUnlockedCash(), getUnlockedCash()) == 0 && getUid().equals(that.getUid());
+		return getLockedQuantity() == that.getLockedQuantity() && getUnlockedQuantity() == that.getUnlockedQuantity()
+				&& getClientId() == that.getClientId() && getInstrumentId() == that.getInstrumentId()
+				&& Double.compare(that.getLockedCash(), getLockedCash()) == 0 && Double.compare(that.getUnlockedCash(), getUnlockedCash()) == 0
+				&& getResult().equals(that.getResult()) && getReferenceId().equals(that.getReferenceId())
+				&& getRequestType().equals(that.getRequestType()) && getRequestSubType().equals(that.getRequestSubType())
+				&& getUid().equals(that.getUid()) && getCreatedTimestamp().equals(that.getCreatedTimestamp());
 	}
 
 	@Override
 	public int hashCode()
 	{
-		return Objects.hash(getLockedQuantity(), getResult(), getReferenceId(), getClientId(), getUnlockedCash(),
+		return Objects.hash(getLockedQuantity(), getResult(), getReferenceId(), getClientId(), getUnlockedCash(), getCreatedTimestamp(),
 				getInstrumentId(), getLockedCash(), getRequestType(), getRequestSubType(), getUnlockedQuantity(), getUid());
 	}
 
 	@Override
 	public String toString()
 	{
-		return "InventoryCheckResponse{" + "lockedQuantity=" + lockedQuantity + ", unlockedQuantity=" + unlockedQuantity + ", result='" + result + '\'' + ", referenceId='" + referenceId + '\'' + ", clientId=" + clientId + ", instrumentId=" + instrumentId + ", lockedCash=" + lockedCash + ", unlockedCash=" + unlockedCash + ", requestType='" + requestType + '\'' + ", requestSubType='" + requestSubType + '\'' + ", uid='" + uid + '\'' + '}';
+		return "InventoryCheckResponse{" + "lockedQuantity=" + lockedQuantity + ", unlockedQuantity=" + unlockedQuantity + ", result='" + result + '\'' + ", referenceId='" + referenceId + '\'' + ", clientId=" + clientId + ", instrumentId=" + instrumentId + ", lockedCash=" + lockedCash + ", unlockedCash=" + unlockedCash + ", requestType='" + requestType + '\'' + ", requestSubType='" + requestSubType + '\'' + ", uid='" + uid + '\'' + ", createdTimestamp=" + createdTimestamp + '}';
 	}
 }

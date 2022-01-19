@@ -3,6 +3,7 @@ package com.leon.handler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.leon.model.*;
 import com.leon.service.DisruptorService;
 import com.leon.service.FxService;
@@ -13,16 +14,11 @@ import net.openhft.chronicle.map.ChronicleMap;
 import net.openhft.chronicle.map.ChronicleMapBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-
-// TODO handle amend up/down and cancellations.
-// TODO Amend is amended qty - original qty  with correct sign to distinguish btw amend up or down.
-// TODO handle log sells, covered short sells, naked short sells.
 
 public class InventoryCheckEventHandler implements EventHandler<DisruptorEvent>
 {
@@ -65,6 +61,7 @@ public class InventoryCheckEventHandler implements EventHandler<DisruptorEvent>
         try
         {
             ObjectMapper mapper = new ObjectMapper();
+            mapper.registerModule(new JavaTimeModule());
             switch (RequestTypeEnum.valueOf(event.getPayload().getPayloadType()))
             {
                 case CASH_CHECK_REQUEST:

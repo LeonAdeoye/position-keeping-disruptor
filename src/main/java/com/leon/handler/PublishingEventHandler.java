@@ -22,7 +22,6 @@ public class PublishingEventHandler implements EventHandler<DisruptorEvent>
         DisruptorPayload payload = event.getPayload();
         if(payload != null)
         {
-            logger.info(payload.toString());
         }
     }
 }
