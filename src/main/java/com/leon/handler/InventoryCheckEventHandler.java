@@ -334,6 +334,23 @@ public class InventoryCheckEventHandler implements EventHandler<DisruptorEvent>
 
     public List<Inventory> getInventory()
     {
-        return this.persistedDisruptorMap.values().stream().collect(Collectors.toList());
+        return persistedDisruptorMap.values().stream().collect(Collectors.toList());
+    }
+
+    public void clearInventory()
+    {
+        persistedDisruptorMap.clear();
+    }
+
+    public void updateInventory(Inventory inventory)
+    {
+        String key = String.format("%06d%06d", inventory.getInstrumentId(), inventory.getClientId());
+        persistedDisruptorMap.put(key, inventory);
+    }
+
+    public void deleteInventory(Inventory inventory)
+    {
+        String key = String.format("%06d%06d", inventory.getInstrumentId(), inventory.getClientId());
+        persistedDisruptorMap.remove(key);
     }
 }

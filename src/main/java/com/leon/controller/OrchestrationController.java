@@ -26,7 +26,7 @@ public class OrchestrationController
     }
 
     @CrossOrigin
-    @RequestMapping(value = "/start")
+    @RequestMapping(value = "/start", method = RequestMethod.GET)
     void start()
     {
         logger.info("Received request to start orchestration.");
@@ -34,7 +34,7 @@ public class OrchestrationController
     }
 
     @CrossOrigin
-    @RequestMapping(value = "/stop")
+    @RequestMapping(value = "/stop", method = RequestMethod.GET)
     void stop()
     {
         logger.info("Received request to stop orchestration.");
@@ -42,7 +42,7 @@ public class OrchestrationController
     }
 
     @CrossOrigin
-    @RequestMapping(value = "/uploadSOD")
+    @RequestMapping(value = "/uploadSOD", method = RequestMethod.GET)
     void uploadSOD(@RequestParam String file)
     {
         if(file == null || file.isEmpty())
@@ -56,7 +56,7 @@ public class OrchestrationController
     }
 
     @CrossOrigin
-    @RequestMapping(value = "/getInventory")
+    @RequestMapping(value = "/getInventory", method = RequestMethod.GET)
     public List<Inventory> getInventory()
     {
         logger.info("Received request to get all inventory items.");
@@ -64,9 +64,26 @@ public class OrchestrationController
     }
 
     @CrossOrigin
-    @RequestMapping(value = "/update")
-    public void update(@RequestBody Inventory inventory)
+    @RequestMapping(value = "/update", method = RequestMethod.PUT)
+    public void updateInventory(@RequestBody Inventory inventory)
     {
         logger.info("Received request to update inventory: " + inventory);
+        orchestrationService.updateInventory(inventory);
+    }
+
+    @CrossOrigin
+    @RequestMapping(value = "/delete", method = RequestMethod.DELETE)
+    public void deleteInventory(@RequestBody Inventory inventory)
+    {
+        logger.info("Received request to delete inventory: " + inventory);
+        orchestrationService.deleteInventory(inventory);
+    }
+
+    @CrossOrigin
+    @RequestMapping(value = "/clear", method = RequestMethod.DELETE)
+    public void clear()
+    {
+        logger.info("Received request to clear inventory.");
+        orchestrationService.clearInventory();
     }
 }

@@ -10,4 +10,7 @@ public interface OrchestrationService
     void stop();
     void upload(String filePath);
     List<Inventory> getInventory();
+    void clearInventory();
+    void updateInventory(Inventory inventory);
+    void deleteInventory(Inventory inventory);
 }

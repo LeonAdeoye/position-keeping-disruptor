@@ -48,7 +48,6 @@ public class OrchestrationServiceImpl implements OrchestrationService
         inventoryCheckEventHandler.start(configurationService.getChronicleMapFilePath());
         logger.info("Initialization completed.");
         uploaded = true;
-
     }
 
     @Override
@@ -105,5 +104,23 @@ public class OrchestrationServiceImpl implements OrchestrationService
     public List<Inventory> getInventory()
     {
         return inventoryCheckEventHandler == null ? new ArrayList<>() : inventoryCheckEventHandler.getInventory();
+    }
+
+    @Override
+    public void clearInventory()
+    {
+        inventoryCheckEventHandler.clearInventory();
+    }
+
+    @Override
+    public void updateInventory(Inventory inventory)
+    {
+        inventoryCheckEventHandler.updateInventory(inventory);
+    }
+
+    @Override
+    public void deleteInventory(Inventory inventory)
+    {
+        inventoryCheckEventHandler.deleteInventory(inventory);
     }
 }
