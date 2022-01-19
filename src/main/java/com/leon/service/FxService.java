@@ -1,7 +1,6 @@
 package com.leon.service;
 
 import com.leon.model.FxRate;
-
 import java.util.Optional;
 
 public interface FxService

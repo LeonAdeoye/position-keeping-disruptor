@@ -1,7 +1,7 @@
 package com.leon.service;
 
-import com.leon.handler.InventoryCheckEventHandler;
 import com.leon.handler.InboundJournalEventHandler;
+import com.leon.handler.InventoryCheckEventHandler;
 import com.leon.handler.OutboundJournalEventHandler;
 import com.leon.handler.PublishingEventHandler;
 import com.leon.io.DisruptorReader;
