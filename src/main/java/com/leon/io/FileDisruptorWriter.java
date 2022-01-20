@@ -6,28 +6,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 @Component
 public class FileDisruptorWriter implements DisruptorWriter
 {
     private static final Logger logger = LoggerFactory.getLogger(FileDisruptorWriter.class);
     private String writerFilePath;
+    private boolean inSilentMode;
 
     @Override
     public void start(ConfigurationServiceImpl configurationService)
     {
         writerFilePath = configurationService.getWriterFilePath();
+        inSilentMode = configurationService.inSilentMode();
     }
 
     @Override
-    public int writeAll(Flux<DisruptorPayload> payload)
+    public void writeAll(Flux<DisruptorPayload> payload)
     {
-        return 0;
     }
 
     @Override
-    public void write(Mono<DisruptorPayload> payload)
+    public void write(DisruptorPayload payload)
     {
 
     }
@@ -36,5 +36,12 @@ public class FileDisruptorWriter implements DisruptorWriter
     public void stop()
     {
 
+    }
+
+    @Override
+    public void toggleSilentMode()
+    {
+        inSilentMode = !inSilentMode;
+        logger.info(inSilentMode ? "Silent mode toggled ON!" : "Silent mode toggled OFF!");
     }
 }

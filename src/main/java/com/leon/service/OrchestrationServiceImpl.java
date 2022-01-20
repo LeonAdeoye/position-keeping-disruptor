@@ -5,7 +5,7 @@ import com.leon.handler.InventoryCheckEventHandler;
 import com.leon.handler.OutboundJournalEventHandler;
 import com.leon.handler.PublishingEventHandler;
 import com.leon.io.DisruptorReader;
-import com.leon.io.DisruptorWriter;
+import com.leon.io.JMSDisruptorWriter;
 import com.leon.model.Inventory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +20,6 @@ import java.util.List;
 public class OrchestrationServiceImpl implements OrchestrationService
 {
     private static final Logger logger = LoggerFactory.getLogger(OrchestrationServiceImpl.class);
-
     @Autowired
     private DisruptorService inboundDisruptor;
     @Autowired
@@ -30,13 +29,11 @@ public class OrchestrationServiceImpl implements OrchestrationService
     @Autowired
     private DisruptorReader requestReader;
     @Autowired
-    private DisruptorWriter responseWriter;
+    private JMSDisruptorWriter responseWriter;
     @Autowired
-    InstrumentService instrumentService;
+    private InstrumentService instrumentService;
     @Autowired
-    FxService fxService;
-    @Autowired
-    ActiveMQConfigurationServiceImpl activeMQConfigurationService;
+    private FxService fxService;
 
     private InventoryCheckEventHandler inventoryCheckEventHandler;
     private boolean uploaded = false;
@@ -61,7 +58,7 @@ public class OrchestrationServiceImpl implements OrchestrationService
             responseWriter.start(configurationService);
             inboundDisruptor.start("INBOUND", new InboundJournalEventHandler(), inventoryCheckEventHandler);
             outboundDisruptor.start("OUTBOUND", new OutboundJournalEventHandler(),
-                    new PublishingEventHandler(responseWriter, activeMQConfigurationService.getPositionCheckResponseTopic()));
+                    new PublishingEventHandler(responseWriter));
             requestReader.readAll().subscribe((request) -> inboundDisruptor.push(request));
             uploaded = false;
             started = true;

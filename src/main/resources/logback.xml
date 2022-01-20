@@ -31,6 +31,7 @@
     </appender>
     <logger name="com.leon.service" level="INFO" />
     <logger name="com.leon.controller" level="INFO" />
+    <logger name="com.leon.io" level="INFO" />
     <logger name="com.leon.handler.PublishingEventHandler" level="INFO"/>
     <logger name="com.leon.handler.InventoryCheckEventHandler" level="INFO"/>
     <logger name="com.leon.handler.OutboundJournalEventHandler" level="INFO">
