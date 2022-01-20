@@ -4,6 +4,7 @@ import com.leon.model.DisruptorPayload;
 import com.leon.service.ConfigurationServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
@@ -13,8 +14,9 @@ public class JMSDisruptorWriter implements DisruptorWriter
 {
 	private static final Logger logger = LoggerFactory.getLogger(JMSDisruptorWriter.class);
 	private boolean inSilentMode = false;
-	private JmsTemplate jmsTemplate;
 	private String positionCheckResponseTopic;
+	@Autowired
+	private JmsTemplate jmsTemplate;
 
 	@Override
 	public void toggleSilentMode()
@@ -27,7 +29,6 @@ public class JMSDisruptorWriter implements DisruptorWriter
 	public void start(ConfigurationServiceImpl configurationService)
 	{
 		this.inSilentMode = configurationService.inSilentMode();
-		this.jmsTemplate = configurationService.jmsTemplate();
 		this.positionCheckResponseTopic = configurationService.getPositionCheckResponseTopic();
 	}
 
