@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 
-@Component
+@Component("FileDisruptorWriter")
 public class FileDisruptorWriter implements DisruptorWriter
 {
     private static final Logger logger = LoggerFactory.getLogger(FileDisruptorWriter.class);

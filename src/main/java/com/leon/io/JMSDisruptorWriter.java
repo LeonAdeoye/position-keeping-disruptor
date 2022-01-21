@@ -9,7 +9,7 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 
-@Component
+@Component("JMSDisruptorWriter")
 public class JMSDisruptorWriter implements DisruptorWriter
 {
 	private static final Logger logger = LoggerFactory.getLogger(JMSDisruptorWriter.class);

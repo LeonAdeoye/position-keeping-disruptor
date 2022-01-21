@@ -11,7 +11,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
-@Component()
+@Component("FileDisruptorReader")
 public class FileDisruptorReader implements DisruptorReader
 {
     private static final Logger logger = LoggerFactory.getLogger(FileDisruptorReader.class);

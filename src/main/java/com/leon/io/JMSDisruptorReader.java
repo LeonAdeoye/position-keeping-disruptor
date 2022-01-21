@@ -4,13 +4,13 @@ import com.leon.model.DisruptorPayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jms.annotation.JmsListener;
+import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
-
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 
-
+@Component("JMSDisruptorReader")
 public class JMSDisruptorReader implements DisruptorReader, MessageListener
 {
 	private static final Logger logger = LoggerFactory.getLogger(JMSDisruptorReader.class);

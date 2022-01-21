@@ -5,12 +5,15 @@ import com.leon.handler.InventoryCheckEventHandler;
 import com.leon.handler.OutboundJournalEventHandler;
 import com.leon.handler.PublishingEventHandler;
 import com.leon.io.DisruptorReader;
-import com.leon.io.JMSDisruptorWriter;
+import com.leon.io.DisruptorWriter;
 import com.leon.model.Inventory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,18 +29,23 @@ public class OrchestrationServiceImpl implements OrchestrationService
     @Autowired
     private ConfigurationServiceImpl configurationService;
     @Autowired
-    private DisruptorReader requestReader;
-    @Autowired
-    private JMSDisruptorWriter responseWriter;
-    @Autowired
     private InstrumentService instrumentService;
     @Autowired
     private FxService fxService;
+    @Autowired
+    private BeanFactory beanFactory;
 
     private InventoryCheckEventHandler inventoryCheckEventHandler;
     private boolean uploaded = false;
     private boolean stopped = false;
     private boolean started = false;
+    private DisruptorReader requestReader;
+    private DisruptorWriter responseWriter;
+
+    @Value("${disruptor.reader.class}")
+    private String disruptorReaderClass;
+    @Value("${disruptor.writer.class}")
+    private String disruptorWriterClass;
 
     @PostConstruct
     public void initialization()
@@ -53,14 +61,18 @@ public class OrchestrationServiceImpl implements OrchestrationService
     {
         if(!started)
         {
-            requestReader.start();
+            responseWriter = beanFactory.getBean(disruptorWriterClass, DisruptorWriter.class);
+            requestReader = beanFactory.getBean(disruptorReaderClass, DisruptorReader.class);
+
             inboundDisruptor.start("INBOUND", new InboundJournalEventHandler(), inventoryCheckEventHandler);
-            outboundDisruptor.start("OUTBOUND", new OutboundJournalEventHandler(),
-                    new PublishingEventHandler(responseWriter));
+            outboundDisruptor.start("OUTBOUND", new OutboundJournalEventHandler(), new PublishingEventHandler(responseWriter));
+
+            requestReader.start();
             requestReader.readAll().subscribe((request) -> inboundDisruptor.push(request));
+
             uploaded = false;
             started = true;
-            logger.info("Starting of disruptors completed.");
+            logger.info("All components started.");
         }
         else
             logger.error("Cannot start components because they have already been started.");
