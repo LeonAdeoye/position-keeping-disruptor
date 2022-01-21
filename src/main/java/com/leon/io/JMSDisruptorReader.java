@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
+
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
@@ -14,6 +15,7 @@ import javax.jms.TextMessage;
 public class JMSDisruptorReader implements DisruptorReader, MessageListener
 {
 	private static final Logger logger = LoggerFactory.getLogger(JMSDisruptorReader.class);
+	Flux<DisruptorPayload> flux = Flux.empty();
 
 	@Override
 	public void start()
@@ -23,7 +25,7 @@ public class JMSDisruptorReader implements DisruptorReader, MessageListener
 	@Override
 	public Flux<DisruptorPayload> readAll()
 	{
-		return null;
+		return flux;
 	}
 
 	@Override
@@ -32,7 +34,7 @@ public class JMSDisruptorReader implements DisruptorReader, MessageListener
 	}
 
 	@Override
-	@JmsListener(destination = "${spring.activemq.position.check.request.topic}")
+	@JmsListener(destination = "${spring.activemq.position.check.response.topic}")
 	public void onMessage(Message message)
 	{
 		try
@@ -40,7 +42,11 @@ public class JMSDisruptorReader implements DisruptorReader, MessageListener
 			if(message instanceof TextMessage)
 			{
 				TextMessage textMessage = (TextMessage) message;
-				logger.info("Received message position check request: " + textMessage.getText());
+				String[] splitInput  = textMessage.getText().split("=");
+				if (splitInput.length == 2)
+					flux = Flux.concat(flux, Flux.just(new DisruptorPayload(splitInput[0], splitInput[1])));
+				else
+					logger.error("String not in correct format");
 			}
 		}
 		catch(Exception e)

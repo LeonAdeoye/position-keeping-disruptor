@@ -6,6 +6,7 @@ import com.leon.handler.OutboundJournalEventHandler;
 import com.leon.handler.PublishingEventHandler;
 import com.leon.io.DisruptorReader;
 import com.leon.io.DisruptorWriter;
+import com.leon.io.JMSDisruptorReader;
 import com.leon.model.Inventory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,8 @@ public class OrchestrationServiceImpl implements OrchestrationService
     private FxService fxService;
     @Autowired
     private BeanFactory beanFactory;
+    @Autowired
+    JMSDisruptorReader reader;
 
     private InventoryCheckEventHandler inventoryCheckEventHandler;
     private boolean uploaded = false;
@@ -69,6 +72,8 @@ public class OrchestrationServiceImpl implements OrchestrationService
 
             requestReader.start();
             requestReader.readAll().subscribe((request) -> inboundDisruptor.push(request));
+
+            reader.readAll().subscribe(load -> System.out.println(load));
 
             uploaded = false;
             started = true;
