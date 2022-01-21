@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,8 +53,7 @@ public class OrchestrationServiceImpl implements OrchestrationService
     {
         if(!started)
         {
-            requestReader.start(configurationService.getReaderFilePath());
-            responseWriter.start(configurationService);
+            requestReader.start();
             inboundDisruptor.start("INBOUND", new InboundJournalEventHandler(), inventoryCheckEventHandler);
             outboundDisruptor.start("OUTBOUND", new OutboundJournalEventHandler(),
                     new PublishingEventHandler(responseWriter));
@@ -77,7 +75,6 @@ public class OrchestrationServiceImpl implements OrchestrationService
             inboundDisruptor.stop();
             outboundDisruptor.stop();
             requestReader.stop();
-            responseWriter.stop();
             uploaded = false;
             stopped = true;
             logger.info("Shutdown and cleanup completed.");

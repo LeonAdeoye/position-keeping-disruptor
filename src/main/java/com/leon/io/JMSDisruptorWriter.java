@@ -1,10 +1,10 @@
 package com.leon.io;
 
 import com.leon.model.DisruptorPayload;
-import com.leon.service.ConfigurationServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
@@ -13,7 +13,9 @@ import reactor.core.publisher.Flux;
 public class JMSDisruptorWriter implements DisruptorWriter
 {
 	private static final Logger logger = LoggerFactory.getLogger(JMSDisruptorWriter.class);
+	@Value("${in.silent.mode}")
 	private boolean inSilentMode = false;
+	@Value("${spring.activemq.position.check.response.topic}")
 	private String positionCheckResponseTopic;
 	@Autowired
 	private JmsTemplate jmsTemplate;
@@ -26,10 +28,8 @@ public class JMSDisruptorWriter implements DisruptorWriter
 	}
 
 	@Override
-	public void start(ConfigurationServiceImpl configurationService)
+	public void start()
 	{
-		this.inSilentMode = configurationService.inSilentMode();
-		this.positionCheckResponseTopic = configurationService.getPositionCheckResponseTopic();
 	}
 
 	@Override
@@ -60,7 +60,7 @@ public class JMSDisruptorWriter implements DisruptorWriter
 		{
 			if(!inSilentMode)
 			{
-				jmsTemplate.convertAndSend(positionCheckResponseTopic, payload.getPayload());
+				jmsTemplate.send(positionCheckResponseTopic, s -> s.createTextMessage(payload.getPayload()));
 				logger.info("Used topic: " + positionCheckResponseTopic  + " to send message: " + payload.getPayload());
 			}
 		}

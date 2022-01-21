@@ -3,8 +3,10 @@ package com.leon.io;
 import com.leon.model.DisruptorPayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -13,10 +15,12 @@ import java.io.IOException;
 public class FileDisruptorReader implements DisruptorReader
 {
     private static final Logger logger = LoggerFactory.getLogger(FileDisruptorReader.class);
+    @Value("${reader.file.path}")
+    private String readerFilePath;
     private BufferedReader reader;
 
     @Override
-    public void start(String readerFilePath)
+    public void start()
     {
         try
         {

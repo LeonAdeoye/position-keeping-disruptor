@@ -1,9 +1,9 @@
 package com.leon.io;
 
 import com.leon.model.DisruptorPayload;
-import com.leon.service.ConfigurationServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 
@@ -11,14 +11,14 @@ import reactor.core.publisher.Flux;
 public class FileDisruptorWriter implements DisruptorWriter
 {
     private static final Logger logger = LoggerFactory.getLogger(FileDisruptorWriter.class);
+    @Value("${writer.file.path}")
     private String writerFilePath;
+    @Value("${in.silent.mode}")
     private boolean inSilentMode;
 
     @Override
-    public void start(ConfigurationServiceImpl configurationService)
+    public void start()
     {
-        writerFilePath = configurationService.getWriterFilePath();
-        inSilentMode = configurationService.inSilentMode();
     }
 
     @Override

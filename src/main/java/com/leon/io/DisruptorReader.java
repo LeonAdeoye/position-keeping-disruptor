@@ -5,7 +5,7 @@ import reactor.core.publisher.Flux;
 
 public interface DisruptorReader
 {
-    void start(String readerFilePath);
+    void start();
     Flux<DisruptorPayload> readAll();
     void stop();
 }
