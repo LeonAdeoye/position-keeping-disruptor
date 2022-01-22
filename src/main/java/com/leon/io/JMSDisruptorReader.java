@@ -42,6 +42,9 @@ public class JMSDisruptorReader implements DisruptorReader, MessageListener
 			if(message instanceof TextMessage)
 			{
 				TextMessage textMessage = (TextMessage) message;
+
+				flux = Flux.concat(flux, Flux.just(new DisruptorPayload("Leon", textMessage.getText())));
+
 				String[] splitInput  = textMessage.getText().split("=");
 				if (splitInput.length == 2)
 					flux = Flux.concat(flux, Flux.just(new DisruptorPayload(splitInput[0], splitInput[1])));
