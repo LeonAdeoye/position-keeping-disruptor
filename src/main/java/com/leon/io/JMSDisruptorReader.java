@@ -49,7 +49,7 @@ public class JMSDisruptorReader implements DisruptorReader, MessageListener
 				if (splitInput.length == 2)
 					flux = Flux.concat(flux, Flux.just(new DisruptorPayload(splitInput[0], splitInput[1])));
 				else
-					logger.error("String not in correct format");
+					logger.error("Incorrect message format: {}", textMessage.getText());
 			}
 		}
 		catch(Exception e)
