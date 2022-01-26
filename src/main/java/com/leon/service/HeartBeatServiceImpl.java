@@ -35,6 +35,7 @@ public class HeartBeatServiceImpl implements HeartBeatService
 	}
 
 	@Override
+	@Scheduled(fixedDelay=100)
 	public void ping()
 	{
 		if(!started)
