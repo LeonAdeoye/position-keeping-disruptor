@@ -6,10 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.jms.Message;
 import javax.jms.TextMessage;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 @Service
 public class HeartBeatServiceImpl implements HeartBeatService
@@ -20,7 +23,11 @@ public class HeartBeatServiceImpl implements HeartBeatService
 	private boolean started = false;
 	@Value("${spring.activemq.heartbeat.topic}")
 	String heartbeatTopic;
+	@Value("${heartbeat.check.maximum.interval}")
+	long heartbeatCheckMaximumInterval;
 	private boolean isPrimary;
+	private String sender;
+	private LocalDateTime timeStamp;
 
 	HeartBeatServiceImpl(boolean isPrimary )
 	{
@@ -30,6 +37,9 @@ public class HeartBeatServiceImpl implements HeartBeatService
 	@Override
 	public void ping()
 	{
+		if(!started)
+			return;
+
 		jmsTemplate.send(heartbeatTopic, s -> s.createTextMessage(isPrimary? "PRIMARY" : "SECONDARY"));
 	}
 
@@ -39,19 +49,29 @@ public class HeartBeatServiceImpl implements HeartBeatService
 	{
 		if(!started)
 			return;
+
 		try
 		{
 			if(message instanceof TextMessage)
 			{
 				TextMessage textMessage = (TextMessage) message;
 
-				logger.info("Received heartbeat message from: {}", textMessage.getText());
+				sender = textMessage.getText();
+				timeStamp = LocalDateTime.now();
+
+				logger.info("Received heartbeat message from: {} at time stamp: {}", sender, timeStamp);
 			}
 		}
 		catch(Exception e)
 		{
 			logger.error("Received Exception with processing position check request: " + e);
 		}
+	}
+
+	@Scheduled(fixedDelay=1000)
+	private boolean checkHeartbeat()
+	{
+		return started && !sender.isEmpty() && Math.abs(ChronoUnit.MILLIS.between(timeStamp, LocalDateTime.now())) > heartbeatCheckMaximumInterval;
 	}
 
 	@Override
