@@ -27,7 +27,7 @@ public class HeartBeatServiceImpl implements HeartBeatService
 	long heartbeatCheckMaximumInterval;
 	private boolean isPrimary;
 	private String sender;
-	private LocalDateTime timeStamp;
+	private LocalDateTime lastTimeStamp;
 
 	HeartBeatServiceImpl(boolean isPrimary )
 	{
@@ -58,21 +58,21 @@ public class HeartBeatServiceImpl implements HeartBeatService
 				TextMessage textMessage = (TextMessage) message;
 
 				sender = textMessage.getText();
-				timeStamp = LocalDateTime.now();
+				lastTimeStamp = LocalDateTime.now();
 
-				logger.info("Received heartbeat message from: {} at time stamp: {}", sender, timeStamp);
+				logger.info("Received heartbeat message from: {} at time stamp: {}", sender, lastTimeStamp);
 			}
 		}
 		catch(Exception e)
 		{
-			logger.error("Received Exception with processing position check request: " + e);
+			logger.error("Received Exception with processing heartbeat: " + e);
 		}
 	}
 
 	@Scheduled(fixedDelay=1000)
 	private boolean checkHeartbeat()
 	{
-		return started && !sender.isEmpty() && Math.abs(ChronoUnit.MILLIS.between(timeStamp, LocalDateTime.now())) > heartbeatCheckMaximumInterval;
+		return started && !sender.isEmpty() && Math.abs(ChronoUnit.MILLIS.between(lastTimeStamp, LocalDateTime.now())) > heartbeatCheckMaximumInterval;
 	}
 
 	@Override
