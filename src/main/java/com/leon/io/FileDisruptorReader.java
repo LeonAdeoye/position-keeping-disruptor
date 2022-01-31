@@ -1,6 +1,7 @@
 package com.leon.io;
 
 import com.leon.model.DisruptorPayload;
+import com.leon.service.ConfigurationServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,10 +33,33 @@ public class FileDisruptorReader implements DisruptorReader
     }
 
     @Override
+    public void start(ConfigurationServiceImpl configurationService)
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void start(String readerFilePath)
+    {
+        try
+        {
+            this.readerFilePath = readerFilePath;
+            reader = new BufferedReader(new FileReader(readerFilePath));
+        }
+        catch(IOException ioe)
+        {
+            logger.error("Failed to instantiate buffered reader for file name: " + readerFilePath + " due to exception: " + ioe.getLocalizedMessage());
+        }
+    }
+
+    @Override
     public Flux<DisruptorPayload> readAll()
     {
         if(reader == null)
+        {
+            logger.error("Reader is null so returning empty flux.");
             return Flux.empty();
+        }
 
         Flux<DisruptorPayload> result = Flux.generate(() -> "", (state, sink) ->
         {

@@ -5,7 +5,7 @@ import java.util.List;
 
 public interface OrchestrationService
 {
-    void start();
+    void start(boolean inRecoveryMode);
     void stop();
     void upload(String filePath);
     List<Inventory> getInventory();
@@ -13,5 +13,4 @@ public interface OrchestrationService
     void updateInventory(Inventory inventory);
     void deleteInventory(Inventory inventory);
     boolean togglePrimary();
-    void recover();
 }

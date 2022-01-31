@@ -29,9 +29,14 @@ public class HeartBeatServiceImpl implements HeartBeatService
 	private String sender;
 	private LocalDateTime lastTimeStamp;
 
-	HeartBeatServiceImpl(boolean isPrimary )
+	HeartBeatServiceImpl(boolean isPrimary)
 	{
 		this.isPrimary = isPrimary;
+	}
+
+	HeartBeatServiceImpl()
+	{
+		this.isPrimary = false;
 	}
 
 	@Override

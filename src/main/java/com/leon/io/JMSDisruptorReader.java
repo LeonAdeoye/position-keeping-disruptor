@@ -1,6 +1,7 @@
 package com.leon.io;
 
 import com.leon.model.DisruptorPayload;
+import com.leon.service.ConfigurationServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jms.annotation.JmsListener;
@@ -15,6 +16,18 @@ public class JMSDisruptorReader implements DisruptorReader, MessageListener
 {
 	private static final Logger logger = LoggerFactory.getLogger(JMSDisruptorReader.class);
 	Flux<DisruptorPayload> flux = Flux.empty();
+
+	@Override
+	public void start(String fileReaderPath)
+	{
+		throw new UnsupportedOperationException("Start with fileReaderPath argument is unsupported.");
+	}
+
+	@Override
+	public void start(ConfigurationServiceImpl configurationService)
+	{
+		throw new UnsupportedOperationException("Start with configuration service argument is unsupported.");
+	}
 
 	@Override
 	public void start()
@@ -33,7 +46,7 @@ public class JMSDisruptorReader implements DisruptorReader, MessageListener
 	}
 
 	@Override
-	@JmsListener(destination = "${spring.activemq.position.check.response.topic}")
+	@JmsListener(destination = "${spring.activemq.position.check.request.topic}")
 	public void onMessage(Message message)
 	{
 		try
@@ -41,9 +54,6 @@ public class JMSDisruptorReader implements DisruptorReader, MessageListener
 			if(message instanceof TextMessage)
 			{
 				TextMessage textMessage = (TextMessage) message;
-
-				flux = Flux.concat(flux, Flux.just(new DisruptorPayload("Leon", textMessage.getText())));
-
 				String[] splitInput  = textMessage.getText().split("=");
 				if (splitInput.length == 2)
 					flux = Flux.concat(flux, Flux.just(new DisruptorPayload(splitInput[0], splitInput[1])));

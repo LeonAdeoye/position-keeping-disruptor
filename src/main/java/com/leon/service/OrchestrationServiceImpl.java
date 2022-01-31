@@ -6,6 +6,7 @@ import com.leon.handler.OutboundJournalEventHandler;
 import com.leon.handler.PublishingEventHandler;
 import com.leon.io.DisruptorReader;
 import com.leon.io.DisruptorWriter;
+import com.leon.io.FileDisruptorReader;
 import com.leon.model.Inventory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +47,8 @@ public class OrchestrationServiceImpl implements OrchestrationService//, Message
     private String disruptorReaderClass;
     @Value("${disruptor.writer.class}")
     private String disruptorWriterClass;
+    @Value("${inbound.journal.path}")
+    private String inboundJournalPath;
 
     @PostConstruct
     public void initialization()
@@ -56,7 +60,7 @@ public class OrchestrationServiceImpl implements OrchestrationService//, Message
     }
 
     @Override
-    public void start()
+    public void start(boolean inRecoveryMode)
     {
         if(!started)
         {
@@ -65,17 +69,34 @@ public class OrchestrationServiceImpl implements OrchestrationService//, Message
 
             inboundDisruptor.start("INBOUND", new InboundJournalEventHandler(), inventoryCheckEventHandler);
             outboundDisruptor.start("OUTBOUND", new OutboundJournalEventHandler(), new PublishingEventHandler(responseWriter));
-
             requestReader.start();
-            requestReader.readAll().subscribe((request) -> inboundDisruptor.push(request));
 
             uploaded = false;
             started = true;
-            logger.info("All components started. Service is running configured with isPrimary mode = " + configurationService.isPrimary());
+
+            logger.info("All components started. Service is now running configured with isPrimary mode = " + configurationService.isPrimary());
+
+            if(inRecoveryMode)
+            {
+                logger.info("Running in recovery mode first- reading from file: " + inboundJournalPath);
+                DisruptorReader recoveryReader = new FileDisruptorReader();
+                recoveryReader.start(inboundJournalPath);
+                recoveryReader.readAll().subscribe((recoveredPayload) ->
+                {
+                    logger.info("Recovered: " + recoveredPayload);
+                    inboundDisruptor.push(recoveredPayload);
+                });
+                recoveryReader.stop();
+                logger.info("Recovery start-up completed.");
+            }
+
+            requestReader.readAll().subscribe((request) -> inboundDisruptor.push(request));
         }
         else
             logger.error("Cannot start components because they have already been started.");
     }
+
+
 
     @Override
     public void stop()
@@ -139,28 +160,5 @@ public class OrchestrationServiceImpl implements OrchestrationService//, Message
         configurationService.setPrimary(isPrimary);
         logger.info("After toggling, the configuration of isPrimary mode is set to: " + isPrimary);
         return isPrimary;
-    }
-
-    @Override
-    public void recover()
-    {
-        if(!started)
-        {
-            // TODO - add method for recovery
-            responseWriter = beanFactory.getBean(disruptorWriterClass, DisruptorWriter.class);
-            requestReader = beanFactory.getBean(disruptorReaderClass, DisruptorReader.class);
-
-            inboundDisruptor.start("INBOUND", new InboundJournalEventHandler(), inventoryCheckEventHandler);
-            outboundDisruptor.start("OUTBOUND", new OutboundJournalEventHandler(), new PublishingEventHandler(responseWriter));
-
-            requestReader.start();
-            requestReader.readAll().subscribe((request) -> inboundDisruptor.push(request));
-
-            uploaded = false;
-            started = true;
-            logger.info("All components recovered. Service is running configured with isPrimary mode = " + configurationService.isPrimary());
-        }
-        else
-            logger.error("Cannot recover components because they have already been started.");
     }
 }

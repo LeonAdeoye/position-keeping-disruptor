@@ -29,15 +29,15 @@ public class OrchestrationController
     void start()
     {
         logger.info("Received request to start orchestration.");
-        orchestrationService.start();
+        orchestrationService.start(false);
     }
 
     @CrossOrigin
     @RequestMapping(value = "/recover", method = RequestMethod.GET)
     void recover()
     {
-        logger.info("Received request to recover.");
-        orchestrationService.recover();
+        logger.info("Received request to recover inbound checks and executions.");
+        orchestrationService.start(true);
     }
 
     @CrossOrigin

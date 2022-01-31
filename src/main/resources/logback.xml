@@ -1,4 +1,5 @@
 <configuration scan="true" scanPeriod="300 seconds" >
+    <property resource="application.properties" />
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>../logs/disruptor-service.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -16,14 +17,14 @@
         </encoder>
     </appender>
     <appender name="INBOUND_JOURNAL_FILE" class="ch.qos.logback.core.FileAppender">
-        <file>../logs/inbound.journal</file>
+        <file>../logs/${inbound.journal.path}</file>
         <append>false</append>
         <encoder>
             <pattern>%msg%n</pattern>
         </encoder>
     </appender>
     <appender name="OUTBOUND_JOURNAL_FILE" class="ch.qos.logback.core.FileAppender">
-        <file>../logs/outbound.journal</file>
+        <file>../logs/${outbound.journal.path}</file>
         <append>false</append>
         <encoder>
             <pattern>%msg%n</pattern>
