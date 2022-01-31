@@ -138,6 +138,7 @@ public class OrchestrationServiceImpl implements OrchestrationService//, Message
     {
         boolean isPrimary = responseWriter.togglePrimary();
         configurationService.setPrimary(isPrimary);
+        logger.info("After toggling, the configuration of isPrimary mode is set to: " + isPrimary);
         return isPrimary;
     }
 }

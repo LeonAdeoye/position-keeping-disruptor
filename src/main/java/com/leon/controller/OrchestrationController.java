@@ -85,4 +85,12 @@ public class OrchestrationController
         logger.info("Received request to clear inventory.");
         orchestrationService.clearInventory();
     }
+
+    @CrossOrigin
+    @RequestMapping(value = "/togglePrimary", method = RequestMethod.GET)
+    public boolean togglePrimary()
+    {
+        logger.info("Received request to toggle isPrimary mode.");
+        return orchestrationService.togglePrimary();
+    }
 }
