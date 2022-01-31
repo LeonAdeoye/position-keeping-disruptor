@@ -14,7 +14,6 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
@@ -81,8 +80,7 @@ public class OrchestrationServiceImpl implements OrchestrationService//, Message
                 logger.info("Running in recovery mode first - reading from file: " + inboundJournalRecoveryPath);
                 DisruptorReader recoveryReader = new FileDisruptorReader();
                 recoveryReader.start(inboundJournalRecoveryPath);
-                recoveryReader.readAll().subscribe(
-                    (recoveredPayload) ->
+                recoveryReader.readAll().subscribe((recoveredPayload) ->
                     {
                         logger.info("Recovered: " + recoveredPayload);
                         inboundDisruptor.push(recoveredPayload);
@@ -100,22 +98,6 @@ public class OrchestrationServiceImpl implements OrchestrationService//, Message
         }
         else
             logger.error("Cannot start components because they have already been started.");
-    }
-
-    private void recover(DisruptorService inboundDisruptor)
-    {
-        logger.info("Running in recovery mode first- reading from file: " + inboundJournalRecoveryPath);
-        DisruptorReader recoveryReader = new FileDisruptorReader();
-        recoveryReader.start(inboundJournalRecoveryPath);
-        recoveryReader.readAll().subscribe((recoveredPayload) ->
-        {
-            logger.info("Recovered: " + recoveredPayload);
-            inboundDisruptor.push(recoveredPayload);
-        },
-        error -> logger.error("Error during recovery: " + error),
-        () -> requestReader.readAll().subscribe((request) -> inboundDisruptor.push(request)));
-        recoveryReader.stop();
-        logger.info("Recovery start-up completed.");
     }
 
     @Override
