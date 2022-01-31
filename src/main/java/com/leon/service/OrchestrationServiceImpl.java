@@ -13,7 +13,6 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,7 +71,7 @@ public class OrchestrationServiceImpl implements OrchestrationService//, Message
 
             uploaded = false;
             started = true;
-            logger.info("All components started.");
+            logger.info("All components started. Service is running configured with isPrimary mode = " + configurationService.isPrimary());
         }
         else
             logger.error("Cannot start components because they have already been started.");
@@ -140,5 +139,28 @@ public class OrchestrationServiceImpl implements OrchestrationService//, Message
         configurationService.setPrimary(isPrimary);
         logger.info("After toggling, the configuration of isPrimary mode is set to: " + isPrimary);
         return isPrimary;
+    }
+
+    @Override
+    public void recover()
+    {
+        if(!started)
+        {
+            // TODO - add method for recovery
+            responseWriter = beanFactory.getBean(disruptorWriterClass, DisruptorWriter.class);
+            requestReader = beanFactory.getBean(disruptorReaderClass, DisruptorReader.class);
+
+            inboundDisruptor.start("INBOUND", new InboundJournalEventHandler(), inventoryCheckEventHandler);
+            outboundDisruptor.start("OUTBOUND", new OutboundJournalEventHandler(), new PublishingEventHandler(responseWriter));
+
+            requestReader.start();
+            requestReader.readAll().subscribe((request) -> inboundDisruptor.push(request));
+
+            uploaded = false;
+            started = true;
+            logger.info("All components recovered. Service is running configured with isPrimary mode = " + configurationService.isPrimary());
+        }
+        else
+            logger.error("Cannot recover components because they have already been started.");
     }
 }
