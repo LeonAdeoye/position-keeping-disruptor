@@ -16,8 +16,8 @@ public class FileDisruptorWriter implements DisruptorWriter
     private static final Logger logger = LoggerFactory.getLogger(FileDisruptorWriter.class);
     @Value("${writer.file.path}")
     private String writerFilePath;
-    @Value("${in.silent.mode}")
-    private boolean inSilentMode;
+    @Value("${is.primary}")
+    private boolean isPrimary;
     FileWriter fileWriter;
 
     @Override
@@ -45,7 +45,7 @@ public class FileDisruptorWriter implements DisruptorWriter
     {
         try
         {
-            if(!inSilentMode)
+            if(isPrimary)
                 fileWriter.write(String.valueOf(payload));
         }
         catch(IOException ioe)
@@ -71,9 +71,10 @@ public class FileDisruptorWriter implements DisruptorWriter
     }
 
     @Override
-    public void toggleSilentMode()
+    public boolean togglePrimary()
     {
-        inSilentMode = !inSilentMode;
-        logger.info(inSilentMode ? "Silent mode toggled ON!" : "Silent mode toggled OFF!");
+        isPrimary = !isPrimary;
+        logger.info(isPrimary ? "Now running in PRIMARY mode." : "Now running in SECONDARY mode.");
+        return isPrimary;
     }
 }

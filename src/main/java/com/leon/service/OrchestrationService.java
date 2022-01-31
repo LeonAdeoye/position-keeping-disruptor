@@ -12,4 +12,5 @@ public interface OrchestrationService
     void clearInventory();
     void updateInventory(Inventory inventory);
     void deleteInventory(Inventory inventory);
+    boolean togglePrimary();
 }

@@ -13,18 +13,19 @@ import reactor.core.publisher.Flux;
 public class JMSDisruptorWriter implements DisruptorWriter
 {
 	private static final Logger logger = LoggerFactory.getLogger(JMSDisruptorWriter.class);
-	@Value("${in.silent.mode}")
-	private boolean inSilentMode = false;
+	@Value("${is.primary}")
+	private boolean isPrimary = false;
 	@Value("${spring.activemq.position.check.response.topic}")
 	private String positionCheckResponseTopic;
 	@Autowired
 	private JmsTemplate jmsTemplate;
 
 	@Override
-	public void toggleSilentMode()
+	public boolean togglePrimary()
 	{
-		inSilentMode = !inSilentMode;
-		logger.info(inSilentMode ? "Silent mode toggled ON!" : "Silent mode toggled OFF!");
+		isPrimary = !isPrimary;
+		logger.info(isPrimary ? "Now running in PRIMARY mode." : "Now running in SECONDARY mode.");
+		return isPrimary;
 	}
 
 	@Override
@@ -35,22 +36,7 @@ public class JMSDisruptorWriter implements DisruptorWriter
 	@Override
 	public void writeAll(Flux<DisruptorPayload> payload)
 	{
-		payload.subscribe(load ->
-		{
-			try
-			{
-				if(!inSilentMode)
-				{
-					jmsTemplate.convertAndSend(positionCheckResponseTopic, load.getPayload());
-					logger.info("Used topic: " + positionCheckResponseTopic  + " to send message: " + load.getPayload());
-				}
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-				logger.error("Exception thrown while sending message:" + e + " on topic: " + positionCheckResponseTopic);
-			}
-		});
+		payload.subscribe(load -> write(load));
 	}
 
 	@Override
@@ -58,7 +44,7 @@ public class JMSDisruptorWriter implements DisruptorWriter
 	{
 		try
 		{
-			if(!inSilentMode)
+			if(isPrimary)
 			{
 				jmsTemplate.send(positionCheckResponseTopic, s -> s.createTextMessage(payload.getPayload()));
 				logger.info("Used topic: " + positionCheckResponseTopic  + " to send message: " + payload.getPayload());

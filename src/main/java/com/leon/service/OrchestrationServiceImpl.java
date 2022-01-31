@@ -132,4 +132,12 @@ public class OrchestrationServiceImpl implements OrchestrationService//, Message
     {
         inventoryCheckEventHandler.deleteInventory(inventory);
     }
+
+    @Override
+    public boolean togglePrimary()
+    {
+        boolean isPrimary = responseWriter.togglePrimary();
+        configurationService.setPrimary(isPrimary);
+        return isPrimary;
+    }
 }

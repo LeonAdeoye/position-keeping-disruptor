@@ -9,5 +9,5 @@ public interface DisruptorWriter
     void writeAll(Flux<DisruptorPayload> payload);
     void write(DisruptorPayload payload);
     void stop();
-    void toggleSilentMode();
+    boolean togglePrimary();
 }

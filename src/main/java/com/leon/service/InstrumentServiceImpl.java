@@ -31,8 +31,6 @@ public class InstrumentServiceImpl implements InstrumentService
 	@Override
 	public Optional<Instrument> get(String bloombergCode)
 	{
-		return instrumentMap.values().stream().
-				filter(instrument -> instrument.getBloombergCode().equals(bloombergCode)).
-				findFirst();
+		return instrumentMap.values().stream().filter(instrument -> instrument.getBloombergCode().equals(bloombergCode)).findFirst();
 	}
 }
