@@ -47,8 +47,8 @@ public class OrchestrationServiceImpl implements OrchestrationService//, Message
     private String disruptorReaderClass;
     @Value("${disruptor.writer.class}")
     private String disruptorWriterClass;
-    @Value("${inbound.journal.path}")
-    private String inboundJournalPath;
+    @Value("${inbound.journal.recovery.path}")
+    private String inboundJournalRecoveryPath;
 
     @PostConstruct
     public void initialization()
@@ -78,25 +78,45 @@ public class OrchestrationServiceImpl implements OrchestrationService//, Message
 
             if(inRecoveryMode)
             {
-                logger.info("Running in recovery mode first- reading from file: " + inboundJournalPath);
+                logger.info("Running in recovery mode first - reading from file: " + inboundJournalRecoveryPath);
                 DisruptorReader recoveryReader = new FileDisruptorReader();
-                recoveryReader.start(inboundJournalPath);
-                recoveryReader.readAll().subscribe((recoveredPayload) ->
-                {
-                    logger.info("Recovered: " + recoveredPayload);
-                    inboundDisruptor.push(recoveredPayload);
-                });
+                recoveryReader.start(inboundJournalRecoveryPath);
+                recoveryReader.readAll().subscribe(
+                    (recoveredPayload) ->
+                    {
+                        logger.info("Recovered: " + recoveredPayload);
+                        inboundDisruptor.push(recoveredPayload);
+                    },
+                    error -> logger.error("Error during recovery: " + error),
+                    () ->
+                    {
+                        logger.info("Recovery completed.");
+                        requestReader.readAll().subscribe((request) -> inboundDisruptor.push(request));
+                    });
                 recoveryReader.stop();
-                logger.info("Recovery start-up completed.");
             }
-
-            requestReader.readAll().subscribe((request) -> inboundDisruptor.push(request));
+            else
+                requestReader.readAll().subscribe((request) -> inboundDisruptor.push(request));
         }
         else
             logger.error("Cannot start components because they have already been started.");
     }
 
-
+    private void recover(DisruptorService inboundDisruptor)
+    {
+        logger.info("Running in recovery mode first- reading from file: " + inboundJournalRecoveryPath);
+        DisruptorReader recoveryReader = new FileDisruptorReader();
+        recoveryReader.start(inboundJournalRecoveryPath);
+        recoveryReader.readAll().subscribe((recoveredPayload) ->
+        {
+            logger.info("Recovered: " + recoveredPayload);
+            inboundDisruptor.push(recoveredPayload);
+        },
+        error -> logger.error("Error during recovery: " + error),
+        () -> requestReader.readAll().subscribe((request) -> inboundDisruptor.push(request)));
+        recoveryReader.stop();
+        logger.info("Recovery start-up completed.");
+    }
 
     @Override
     public void stop()
