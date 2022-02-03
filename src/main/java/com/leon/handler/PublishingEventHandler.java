@@ -21,6 +21,9 @@ public class PublishingEventHandler implements EventHandler<DisruptorEvent>
     {
         DisruptorPayload payload = event.getPayload();
         if(payload != null)
+        {
             writer.write(payload);
+            logger.info("Published response " + payload + " for check request with UID: " + payload.getUid() + ", time taken in nano-seconds: " + (System.nanoTime() - payload.getCreatedInstant()));
+        }
     }
 }

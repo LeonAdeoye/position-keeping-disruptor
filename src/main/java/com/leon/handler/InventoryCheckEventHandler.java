@@ -58,33 +58,34 @@ public class InventoryCheckEventHandler implements EventHandler<DisruptorEvent>
 
     public void onEvent(DisruptorEvent event, long sequence, boolean endOfBatch)
     {
+        DisruptorPayload payload = event.getPayload();
+        logger.info("Processing event with payload: " + payload);
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        String result;
         try
         {
-            logger.info("Processing event with payload: " + event.getPayload());
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.registerModule(new JavaTimeModule());
-            String result;
-            switch (RequestTypeEnum.valueOf(event.getPayload().getPayloadType()))
+            switch (RequestTypeEnum.valueOf(payload.getPayloadType()))
             {
                 case CASH_CHECK_REQUEST:
-                    result = mapper.writeValueAsString(processCashCheckRequest(MessageFactory.createCashCheckRequestMessage(event.getPayload().getPayload())));
-                    outboundDisruptor.push(new DisruptorPayload("CASH_CHECK_REQUEST_RESPONSE", result, event.getPayload().getUid()));
+                    result = mapper.writeValueAsString(processCashCheckRequest(MessageFactory.createCashCheckRequestMessage(payload.getPayload())));
+                    outboundDisruptor.push(new DisruptorPayload("CASH_CHECK_REQUEST_RESPONSE", result, payload.getUid(), payload.getCreatedInstant()));
                     break;
                 case POSITION_CHECK_REQUEST:
-                    result = mapper.writeValueAsString(processPositionCheckRequest(MessageFactory.createPositionCheckRequestMessage(event.getPayload().getPayload())));
-                    outboundDisruptor.push(new DisruptorPayload("POSITION_CHECK_REQUEST_RESPONSE", result, event.getPayload().getUid()));
+                    result = mapper.writeValueAsString(processPositionCheckRequest(MessageFactory.createPositionCheckRequestMessage(payload.getPayload())));
+                    outboundDisruptor.push(new DisruptorPayload("POSITION_CHECK_REQUEST_RESPONSE", result, payload.getUid(), payload.getCreatedInstant()));
                     break;
                 case EXECUTION_MESSAGE:
-                    processExecution(MessageFactory.createExecutionMessage(event.getPayload().getPayload()));
+                    processExecution(MessageFactory.createExecutionMessage(payload.getPayload()));
             }
         }
         catch(IllegalArgumentException e)
         {
-            logger.error("Event ignored because cannot convert " + event.getPayload().getPayloadType() + " to RequestTypeEnum. Exception thrown: " + e.getLocalizedMessage());
+            logger.error("Event ignored because cannot convert " + payload.getPayloadType() + " to RequestTypeEnum. Exception thrown: " + e.getLocalizedMessage());
         }
         catch (JsonProcessingException e)
         {
-            logger.error("Event ignored because cannot convert " + event.getPayload().getPayload() + " to JSON. Exception thrown: " + e.getLocalizedMessage());
+            logger.error("Event ignored because cannot convert " + payload.getPayload() + " to JSON. Exception thrown: " + e.getLocalizedMessage());
         }
     }
 

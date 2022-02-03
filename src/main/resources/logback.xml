@@ -30,19 +30,40 @@
             <pattern>%msg%n</pattern>
         </encoder>
     </appender>
+
+    <appender name="ASYNC_STDOUT" class="ch.qos.logback.classic.AsyncAppender">
+        <discardingThreshold>0</discardingThreshold>
+        <appender-ref ref="STDOUT" />
+    </appender>
+
+    <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <discardingThreshold>0</discardingThreshold>
+        <appender-ref ref="FILE" />
+    </appender>
+
+    <appender name="ASYNC_INBOUND_JOURNAL_FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <discardingThreshold>0</discardingThreshold>
+        <appender-ref ref="INBOUND_JOURNAL_FILE" />
+    </appender>
+
+    <appender name="ASYNC_OUTBOUND_JOURNAL_FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <discardingThreshold>0</discardingThreshold>
+        <appender-ref ref="OUTBOUND_JOURNAL_FILE" />
+    </appender>
+
     <logger name="com.leon.service" level="INFO" />
     <logger name="com.leon.controller" level="INFO" />
     <logger name="com.leon.io" level="INFO" />
     <logger name="com.leon.handler.PublishingEventHandler" level="INFO"/>
     <logger name="com.leon.handler.InventoryCheckEventHandler" level="INFO"/>
     <logger name="com.leon.handler.OutboundJournalEventHandler" level="INFO">
-        <appender-ref ref="OUTBOUND_JOURNAL_FILE"/>
+        <appender-ref ref="ASYNC_OUTBOUND_JOURNAL_FILE"/>
     </logger>
     <logger name="com.leon.handler.InboundJournalEventHandler" level="INFO">
-        <appender-ref ref="INBOUND_JOURNAL_FILE"/>
+        <appender-ref ref="ASYNC_INBOUND_JOURNAL_FILE"/>
     </logger>
     <root level="ERROR">
-        <appender-ref ref="STDOUT" />
-        <appender-ref ref="FILE" />
+        <appender-ref ref="ASYNC_STDOUT" />
+        <appender-ref ref="ASYNC_FILE" />
     </root>
 </configuration>

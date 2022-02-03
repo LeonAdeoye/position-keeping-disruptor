@@ -1,7 +1,7 @@
 package com.leon.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.time.LocalDateTime;
+
 import java.util.Objects;
 
 public class InventoryCheckResponse
@@ -26,8 +26,6 @@ public class InventoryCheckResponse
 	private String requestType;
 	@JsonProperty("requestSubType")
 	private String requestSubType;
-	@JsonProperty("createdTimestamp")
-	private LocalDateTime createdTimestamp;
 
 	public InventoryCheckResponse(int lockedQuantity, int unlockedQuantity, String result, String referenceId, int clientId, int instrumentId, double lockedCash, double unlockedCash, String requestType, String requestSubType)
 	{
@@ -41,7 +39,6 @@ public class InventoryCheckResponse
 		this.unlockedCash = unlockedCash;
 		this.requestType = requestType;
 		this.requestSubType = requestSubType;
-		this.createdTimestamp = LocalDateTime.now();
 	}
 
 	public InventoryCheckResponse() {}
@@ -146,16 +143,6 @@ public class InventoryCheckResponse
 		this.unlockedCash = unlockedCash;
 	}
 
-	public LocalDateTime getCreatedTimestamp()
-	{
-		return createdTimestamp;
-	}
-
-	public void setCreatedTimestamp(LocalDateTime createdTimestamp)
-	{
-		this.createdTimestamp = createdTimestamp;
-	}
-
 	@Override
 	public boolean equals(Object o)
 	{
@@ -166,20 +153,19 @@ public class InventoryCheckResponse
 				&& getClientId() == that.getClientId() && getInstrumentId() == that.getInstrumentId()
 				&& Double.compare(that.getLockedCash(), getLockedCash()) == 0 && Double.compare(that.getUnlockedCash(), getUnlockedCash()) == 0
 				&& getResult().equals(that.getResult()) && getReferenceId().equals(that.getReferenceId())
-				&& getRequestType().equals(that.getRequestType()) && getRequestSubType().equals(that.getRequestSubType())
-				&& getCreatedTimestamp().equals(that.getCreatedTimestamp());
+				&& getRequestType().equals(that.getRequestType()) && getRequestSubType().equals(that.getRequestSubType());
 	}
 
 	@Override
 	public int hashCode()
 	{
-		return Objects.hash(getLockedQuantity(), getResult(), getReferenceId(), getClientId(), getUnlockedCash(), getCreatedTimestamp(),
+		return Objects.hash(getLockedQuantity(), getResult(), getReferenceId(), getClientId(), getUnlockedCash(),
 				getInstrumentId(), getLockedCash(), getRequestType(), getRequestSubType(), getUnlockedQuantity());
 	}
 
 	@Override
 	public String toString()
 	{
-		return "InventoryCheckResponse{" + "lockedQuantity=" + lockedQuantity + ", unlockedQuantity=" + unlockedQuantity + ", result='" + result + '\'' + ", referenceId='" + referenceId + '\'' + ", clientId=" + clientId + ", instrumentId=" + instrumentId + ", lockedCash=" + lockedCash + ", unlockedCash=" + unlockedCash + ", requestType='" + requestType + '\'' + ", requestSubType='" + requestSubType + ", createdTimestamp=" + createdTimestamp + '}';
+		return "InventoryCheckResponse{" + "lockedQuantity=" + lockedQuantity + ", unlockedQuantity=" + unlockedQuantity + ", result='" + result + '\'' + ", referenceId='" + referenceId + '\'' + ", clientId=" + clientId + ", instrumentId=" + instrumentId + ", lockedCash=" + lockedCash + ", unlockedCash=" + unlockedCash + ", requestType='" + requestType + '\'' + ", requestSubType='" + requestSubType + '}';
 	}
 }
