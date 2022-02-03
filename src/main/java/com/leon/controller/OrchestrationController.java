@@ -29,7 +29,7 @@ public class OrchestrationController
     void start()
     {
         logger.info("Received request to start orchestration.");
-        orchestrationService.start(false);
+        orchestrationService.start();
     }
 
     @CrossOrigin
@@ -37,7 +37,7 @@ public class OrchestrationController
     void recover()
     {
         logger.info("Received request to recover inbound checks and executions.");
-        orchestrationService.start(true);
+        orchestrationService.recover();
     }
 
     @CrossOrigin

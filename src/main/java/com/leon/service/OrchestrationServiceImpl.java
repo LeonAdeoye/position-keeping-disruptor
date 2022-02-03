@@ -36,9 +36,7 @@ public class OrchestrationServiceImpl implements OrchestrationService//, Message
     private BeanFactory beanFactory;
 
     private InventoryCheckEventHandler inventoryCheckEventHandler;
-    private boolean uploaded = false;
-    private boolean stopped = false;
-    private boolean started = false;
+    private boolean hasStarted = false;
     private DisruptorReader requestReader;
     private DisruptorWriter responseWriter;
 
@@ -46,75 +44,78 @@ public class OrchestrationServiceImpl implements OrchestrationService//, Message
     private String disruptorReaderClass;
     @Value("${disruptor.writer.class}")
     private String disruptorWriterClass;
-    @Value("${inbound.journal.recovery.path}")
-    private String inboundJournalRecoveryPath;
+    @Value("${inbound.journal.recovery.file.path}")
+    private String inboundJournalRecoveryFilePath;
+    @Value("${chronicle.map.file.path}")
+    private String chronicleMapFilePath;
 
     @PostConstruct
     public void initialization()
     {
         inventoryCheckEventHandler = new InventoryCheckEventHandler(outboundDisruptor, instrumentService, fxService);
-        inventoryCheckEventHandler.start(configurationService.getChronicleMapFilePath());
-        logger.info("Initialization completed.");
-        uploaded = true;
+        inventoryCheckEventHandler.start(chronicleMapFilePath);
+
+        responseWriter = beanFactory.getBean(disruptorWriterClass, DisruptorWriter.class);
+        requestReader = beanFactory.getBean(disruptorReaderClass, DisruptorReader.class);
+
+        inboundDisruptor.start("INBOUND", new InboundJournalEventHandler(), inventoryCheckEventHandler);
+        outboundDisruptor.start("OUTBOUND", new OutboundJournalEventHandler(), new PublishingEventHandler(responseWriter));
+
+        logger.info("Completed initialization of components with isPrimary mode = " + configurationService.isPrimary());
     }
 
     @Override
-    public void start(boolean inRecoveryMode)
+    public void start()
     {
-        if(!started)
+        if(!hasStarted)
         {
-            responseWriter = beanFactory.getBean(disruptorWriterClass, DisruptorWriter.class);
-            requestReader = beanFactory.getBean(disruptorReaderClass, DisruptorReader.class);
-
-            inboundDisruptor.start("INBOUND", new InboundJournalEventHandler(), inventoryCheckEventHandler);
-            outboundDisruptor.start("OUTBOUND", new OutboundJournalEventHandler(), new PublishingEventHandler(responseWriter));
+            hasStarted = true;
+            logger.info("Now starting to listen to inbound requests...");
             requestReader.start();
-
-            uploaded = false;
-            started = true;
-
-            logger.info("All components started. Service is now running configured with isPrimary mode = " + configurationService.isPrimary());
-
-            if(inRecoveryMode)
-            {
-                logger.info("Running in recovery mode first - reading from file: " + inboundJournalRecoveryPath);
-                DisruptorReader recoveryReader = new FileDisruptorReader();
-                recoveryReader.start(inboundJournalRecoveryPath);
-                recoveryReader.readAll().subscribe((recoveredPayload) ->
-                    {
-                        logger.info("Recovered: " + recoveredPayload);
-                        inboundDisruptor.push(recoveredPayload);
-                    },
-                    error -> logger.error("Error during recovery: " + error),
-                    () ->
-                    {
-                        logger.info("Recovery completed.");
-                        requestReader.readAll().subscribe((request) -> inboundDisruptor.push(request));
-                    });
-                recoveryReader.stop();
-            }
-            else
-                requestReader.readAll().subscribe((request) -> inboundDisruptor.push(request));
+            requestReader.readAll().subscribe((request) -> inboundDisruptor.push(request));
         }
         else
             logger.error("Cannot start components because they have already been started.");
     }
 
     @Override
+    public void recover()
+    {
+        if(!hasStarted)
+        {
+            logger.info("Running in recovery mode first - reading from file: " + inboundJournalRecoveryFilePath);
+            DisruptorReader recoveryReader = new FileDisruptorReader();
+            recoveryReader.start(inboundJournalRecoveryFilePath);
+            recoveryReader.readAll().subscribe((recoveredPayload) ->
+                {
+                    logger.info("Recovered: " + recoveredPayload);
+                    inboundDisruptor.push(recoveredPayload);
+                },
+                error -> logger.error("Error during recovery: " + error),
+                () ->
+                {
+                    logger.info("Recovery completed.");
+                    start();
+                });
+            recoveryReader.stop();
+        }
+        else
+            logger.error("Cannot start components in recovery mode because they have already been started.");
+    }
+
+    @Override
     public void stop()
     {
-        if(!stopped)
+        if(hasStarted)
         {
             inventoryCheckEventHandler.stop();
             inboundDisruptor.stop();
             outboundDisruptor.stop();
             requestReader.stop();
-            uploaded = false;
-            stopped = true;
             logger.info("Shutdown and cleanup completed.");
         }
         else
-            logger.error("Cannot stop components because they have already been stopped.");
+            logger.error("Cannot stop components because they have not been started correctly.");
     }
 
     // TODO - system needs to be able to reload SOD positions at anytime.
@@ -122,11 +123,8 @@ public class OrchestrationServiceImpl implements OrchestrationService//, Message
     @Override
     public void upload(String sodFilePath)
     {
-        if(inventoryCheckEventHandler != null && uploaded)
-        {
+        if(!hasStarted)
             inventoryCheckEventHandler.uploadSODPositions(sodFilePath);
-            uploaded = false;
-        }
         else
             logger.error("Cannot upload SOD file because orchestration service is not in the right state.");
     }

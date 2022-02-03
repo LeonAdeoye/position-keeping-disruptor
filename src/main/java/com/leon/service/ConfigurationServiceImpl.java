@@ -22,15 +22,10 @@ public class ConfigurationServiceImpl
     @Value("${bufferSize}")
     private int bufferSize;
 
-    @Value("${chronicleMapFilePath}")
-    private String chronicleMapFilePath;
-
     public int getBufferSize()
     {
         return bufferSize;
     }
-
-    public String getChronicleMapFilePath() { return chronicleMapFilePath; }
 
     public boolean isPrimary()
     {

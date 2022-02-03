@@ -5,7 +5,8 @@ import java.util.List;
 
 public interface OrchestrationService
 {
-    void start(boolean inRecoveryMode);
+    void start();
+    void recover();
     void stop();
     void upload(String filePath);
     List<Inventory> getInventory();
