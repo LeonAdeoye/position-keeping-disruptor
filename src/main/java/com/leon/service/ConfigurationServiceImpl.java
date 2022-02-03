@@ -18,27 +18,18 @@ public class ConfigurationServiceImpl
 
     @Value("${is.primary}")
     private boolean isPrimary;
-
-    @Value("${bufferSize}")
-    private int bufferSize;
-
-    public int getBufferSize()
-    {
-        return bufferSize;
-    }
-
     public boolean isPrimary()
     {
         return isPrimary;
     }
-
     public void setPrimary(boolean primary)
     {
         isPrimary = primary;
     }
 
     @Bean
-    public JmsListenerContainerFactory<?> containerFactory() {
+    public JmsListenerContainerFactory<?> containerFactory()
+    {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);
         factory.setErrorHandler(new JmsErrorHandler());

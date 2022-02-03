@@ -24,14 +24,14 @@ public class JMSDisruptorWriter implements DisruptorWriter
 	public boolean togglePrimary()
 	{
 		isPrimary = !isPrimary;
-		logger.info(isPrimary ? "Toggled. Now running in PRIMARY mode." : "Now running in SECONDARY mode.");
+		logger.info(isPrimary ? "Toggled. Writer now running in PRIMARY mode." : "Writer now running in SECONDARY mode.");
 		return isPrimary;
 	}
 
 	@Override
 	public void start()
 	{
-		logger.info(isPrimary ? "Started in PRIMARY mode." : "Started in SECONDARY mode.");
+		logger.info((isPrimary ? "Started writer in PRIMARY mode" : "Started writer in SECONDARY mode") + " with topic: " + positionCheckResponseTopic);
 	}
 
 	@Override
@@ -46,10 +46,7 @@ public class JMSDisruptorWriter implements DisruptorWriter
 		try
 		{
 			if(isPrimary)
-			{
 				jmsTemplate.send(positionCheckResponseTopic, s -> s.createTextMessage(payload.getPayload()));
-				logger.info("Used topic: " + positionCheckResponseTopic  + " to send message: " + payload.getPayload() + " for request with UID: " + payload.getUid());
-			}
 		}
 		catch(Exception e)
 		{

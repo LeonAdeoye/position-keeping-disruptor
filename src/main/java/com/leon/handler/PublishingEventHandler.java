@@ -20,10 +20,7 @@ public class PublishingEventHandler implements EventHandler<DisruptorEvent>
     public void onEvent(DisruptorEvent event, long sequence, boolean endOfBatch)
     {
         DisruptorPayload payload = event.getPayload();
-        if(payload != null)
-        {
-            writer.write(payload);
-            logger.info("Published response " + payload + " for check request with UID: " + payload.getUid() + ", time taken in nano-seconds: " + (System.nanoTime() - payload.getCreatedTime()));
-        }
+        writer.write(payload);
+        logger.info("Published response: " + payload + ", time taken in nano-seconds: " + (System.nanoTime() - payload.getCreatedTime()));
     }
 }

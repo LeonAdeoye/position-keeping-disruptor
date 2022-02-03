@@ -12,7 +12,8 @@ import com.leon.handler.DisruptorEventProducer;
 import com.leon.model.DisruptorEvent;
 import com.leon.model.DisruptorEventFactory;
 import com.leon.model.DisruptorPayload;
-import com.lmax.disruptor.BlockingWaitStrategy;
+import com.lmax.disruptor.BusySpinWaitStrategy;
+import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
@@ -20,9 +21,9 @@ import com.lmax.disruptor.util.DaemonThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
-import com.lmax.disruptor.EventHandler;
 
 @Scope("prototype")
 @Service
@@ -34,6 +35,8 @@ public class DisruptorServiceImpl implements DisruptorService
     private long timeTaken = 0;
     private Disruptor<DisruptorEvent> disruptor;
     private DisruptorEventProducer producer;
+    @Value("${buffer.size}")
+    private int bufferSize;
 
     @Autowired
     ConfigurationServiceImpl configurationService;
@@ -47,11 +50,11 @@ public class DisruptorServiceImpl implements DisruptorService
         DisruptorEventFactory factory = new DisruptorEventFactory();
 
         // Construct the Disruptor
-        disruptor = new Disruptor<DisruptorEvent>(factory, configurationService.getBufferSize(),
-                DaemonThreadFactory.INSTANCE, ProducerType.SINGLE, new BlockingWaitStrategy());
+        disruptor = new Disruptor<DisruptorEvent>(factory, bufferSize,
+                DaemonThreadFactory.INSTANCE, ProducerType.SINGLE, new BusySpinWaitStrategy());
         logger.info("Created " + name + " disruptor.");
 
-        disruptor.handleEventsWith(journalHandler).then(actionEventHandler);
+        disruptor.handleEventsWith(journalHandler, actionEventHandler);
 
         // Start the Disruptor, starts all threads running
         disruptor.start();

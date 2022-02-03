@@ -17,6 +17,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -69,11 +71,11 @@ public class InventoryCheckEventHandler implements EventHandler<DisruptorEvent>
             {
                 case CASH_CHECK_REQUEST:
                     result = mapper.writeValueAsString(processCashCheckRequest(MessageFactory.createCashCheckRequestMessage(payload.getPayload())));
-                    outboundDisruptor.push(new DisruptorPayload("CASH_CHECK_REQUEST_RESPONSE", result, payload.getUid(), payload.getCreatedTime()));
+                    outboundDisruptor.push(new DisruptorPayload("CASH_CHECK_RESPONSE", result, payload.getUid(), payload.getCreatedTime()));
                     break;
                 case POSITION_CHECK_REQUEST:
                     result = mapper.writeValueAsString(processPositionCheckRequest(MessageFactory.createPositionCheckRequestMessage(payload.getPayload())));
-                    outboundDisruptor.push(new DisruptorPayload("POSITION_CHECK_REQUEST_RESPONSE", result, payload.getUid(), payload.getCreatedTime()));
+                    outboundDisruptor.push(new DisruptorPayload("POSITION_CHECK_RESPONSE", result, payload.getUid(), payload.getCreatedTime()));
                     break;
                 case EXECUTION_MESSAGE:
                     processExecution(MessageFactory.createExecutionMessage(payload.getPayload()));
@@ -91,6 +93,7 @@ public class InventoryCheckEventHandler implements EventHandler<DisruptorEvent>
 
     private InventoryCheckResponse processPositionCheckRequest(CheckPositionRequestMessage checkPositionRequestMessage)
     {
+        Instant start = Instant.now();
         InventoryCheckResponse inventoryCheckResponse = new InventoryCheckResponse();
         String key = String.format("%06d%06d", checkPositionRequestMessage.getInstrumentId(), checkPositionRequestMessage.getClientId());
         Inventory inventory = persistedDisruptorMap.get(key);
@@ -101,12 +104,13 @@ public class InventoryCheckEventHandler implements EventHandler<DisruptorEvent>
             inventoryCheckResponse = handlePositionUnlockRequest(checkPositionRequestMessage, inventory);
 
         persistedDisruptorMap.put(key, inventory);
-        logger.info(String.format("Completed position check: %s", checkPositionRequestMessage));
+        logger.info(String.format("Completed position check: %s, time taken: %d ms.", checkPositionRequestMessage, Duration.between(start, Instant.now()).toMillis()));
         return inventoryCheckResponse;
     }
 
     private InventoryCheckResponse processCashCheckRequest(CheckCashRequestMessage checkCashRequestMessage)
     {
+        Instant start = Instant.now();
         InventoryCheckResponse inventoryCheckResponse = new InventoryCheckResponse();
         String key = String.format("%06d%06d", checkCashRequestMessage.getInstrumentId(), checkCashRequestMessage.getClientId());
         Inventory inventory = persistedDisruptorMap.get(key);
@@ -117,7 +121,7 @@ public class InventoryCheckEventHandler implements EventHandler<DisruptorEvent>
             inventoryCheckResponse = handleCashUnlockRequest(checkCashRequestMessage, inventory);
 
         persistedDisruptorMap.put(key, inventory);
-        logger.info(String.format("Completed cash check: %s", checkCashRequestMessage));
+        logger.info(String.format("Completed cash check: %s, time taken: %d ms.", checkCashRequestMessage, Duration.between(start, Instant.now()).toMillis()));
         return inventoryCheckResponse;
     }
 
@@ -276,6 +280,10 @@ public class InventoryCheckEventHandler implements EventHandler<DisruptorEvent>
                     .valueMarshaller(InventorySerializer.getInstance())
                     .averageKey("000001000001")
                     .createPersistedTo(new File(chronicleMapFilePath));
+
+            // Warm-up step to make the chronicle map get method faster
+            persistedDisruptorMap.get("000001000001");
+            persistedDisruptorMap.get("999999999999");
 
             logger.info("Created the chronicle map from persisted file: " + chronicleMapFilePath + " with " + persistedDisruptorMap.size() + " inventory positions.");
         }

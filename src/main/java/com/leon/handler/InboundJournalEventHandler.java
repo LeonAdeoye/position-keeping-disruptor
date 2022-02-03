@@ -11,6 +11,6 @@ public class InboundJournalEventHandler implements EventHandler<DisruptorEvent>
 
     public void onEvent(DisruptorEvent event, long sequence, boolean endOfBatch)
     {
-        logger.info(event.getPayload().getPayloadType() + "=" + event.getPayload().getPayload());
+        //logger.info(event.getPayload().getPayloadType() + "=" + event.getPayload().getPayload());
     }
 }
