@@ -69,11 +69,11 @@ public class InventoryCheckEventHandler implements EventHandler<DisruptorEvent>
             {
                 case CASH_CHECK_REQUEST:
                     result = mapper.writeValueAsString(processCashCheckRequest(MessageFactory.createCashCheckRequestMessage(payload.getPayload())));
-                    outboundDisruptor.push(new DisruptorPayload("CASH_CHECK_REQUEST_RESPONSE", result, payload.getUid(), payload.getCreatedInstant()));
+                    outboundDisruptor.push(new DisruptorPayload("CASH_CHECK_REQUEST_RESPONSE", result, payload.getUid(), payload.getCreatedTime()));
                     break;
                 case POSITION_CHECK_REQUEST:
                     result = mapper.writeValueAsString(processPositionCheckRequest(MessageFactory.createPositionCheckRequestMessage(payload.getPayload())));
-                    outboundDisruptor.push(new DisruptorPayload("POSITION_CHECK_REQUEST_RESPONSE", result, payload.getUid(), payload.getCreatedInstant()));
+                    outboundDisruptor.push(new DisruptorPayload("POSITION_CHECK_REQUEST_RESPONSE", result, payload.getUid(), payload.getCreatedTime()));
                     break;
                 case EXECUTION_MESSAGE:
                     processExecution(MessageFactory.createExecutionMessage(payload.getPayload()));
