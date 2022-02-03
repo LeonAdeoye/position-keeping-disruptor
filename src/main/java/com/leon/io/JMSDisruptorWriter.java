@@ -47,7 +47,7 @@ public class JMSDisruptorWriter implements DisruptorWriter
 			if(isPrimary)
 			{
 				jmsTemplate.send(positionCheckResponseTopic, s -> s.createTextMessage(payload.getPayload()));
-				logger.info("Used topic: " + positionCheckResponseTopic  + " to send message: " + payload.getPayload());
+				logger.info("Used topic: " + positionCheckResponseTopic  + " to send message: " + payload.getPayload() + " for request with UID: " + payload.getUid());
 			}
 		}
 		catch(Exception e)

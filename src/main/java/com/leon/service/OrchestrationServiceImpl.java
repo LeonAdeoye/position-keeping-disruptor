@@ -36,7 +36,6 @@ public class OrchestrationServiceImpl implements OrchestrationService//, Message
     private BeanFactory beanFactory;
 
     private InventoryCheckEventHandler inventoryCheckEventHandler;
-    private boolean hasStarted = false;
     private DisruptorReader requestReader;
     private DisruptorWriter responseWriter;
 
@@ -48,6 +47,8 @@ public class OrchestrationServiceImpl implements OrchestrationService//, Message
     private String inboundJournalRecoveryFilePath;
     @Value("${chronicle.map.file.path}")
     private String chronicleMapFilePath;
+
+    private boolean hasStarted = false;
 
     @PostConstruct
     public void initialization()

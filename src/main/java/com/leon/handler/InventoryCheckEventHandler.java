@@ -58,20 +58,21 @@ public class InventoryCheckEventHandler implements EventHandler<DisruptorEvent>
 
     public void onEvent(DisruptorEvent event, long sequence, boolean endOfBatch)
     {
-        String result = "";
         try
         {
+            logger.info("Processing event with payload: " + event.getPayload());
             ObjectMapper mapper = new ObjectMapper();
             mapper.registerModule(new JavaTimeModule());
+            String result;
             switch (RequestTypeEnum.valueOf(event.getPayload().getPayloadType()))
             {
                 case CASH_CHECK_REQUEST:
                     result = mapper.writeValueAsString(processCashCheckRequest(MessageFactory.createCashCheckRequestMessage(event.getPayload().getPayload())));
-                    outboundDisruptor.push(new DisruptorPayload("CASH_CHECK_REQUEST_RESPONSE", result));
+                    outboundDisruptor.push(new DisruptorPayload("CASH_CHECK_REQUEST_RESPONSE", result, event.getPayload().getUid()));
                     break;
                 case POSITION_CHECK_REQUEST:
                     result = mapper.writeValueAsString(processPositionCheckRequest(MessageFactory.createPositionCheckRequestMessage(event.getPayload().getPayload())));
-                    outboundDisruptor.push(new DisruptorPayload("POSITION_CHECK_REQUEST_RESPONSE", result));
+                    outboundDisruptor.push(new DisruptorPayload("POSITION_CHECK_REQUEST_RESPONSE", result, event.getPayload().getUid()));
                     break;
                 case EXECUTION_MESSAGE:
                     processExecution(MessageFactory.createExecutionMessage(event.getPayload().getPayload()));
