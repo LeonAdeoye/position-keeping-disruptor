@@ -1,11 +1,15 @@
 package com.leon.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class FxRate
 {
+	@JsonProperty("currency")
 	private String currency;
+	@JsonProperty("fxRateAgainstUSD")
 	private double fxRateAgainstUSD;
 	private LocalDateTime updatedDateTime;
 

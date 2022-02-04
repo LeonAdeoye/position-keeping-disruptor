@@ -7,4 +7,5 @@ public interface FxService
 {
 	void put(String currency, double fxRateAgainstOneUSD);
 	Optional<FxRate> get(String currency);
+	void upload(String uploadFilePath);
 }

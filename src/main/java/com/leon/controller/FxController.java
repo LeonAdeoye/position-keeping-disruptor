@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,14 +52,14 @@ public class FxController
 
 	@CrossOrigin
 	@RequestMapping(value = "/upload", method = RequestMethod.GET)
-	public void uploadFx(@RequestParam String file)
+	public void uploadFx(@RequestParam String uploadFilePath)
 	{
-		if(file == null || file.isEmpty())
+		if(uploadFilePath == null || uploadFilePath.isEmpty())
 		{
-			logger.error("file request parameter cannot be null or empty");
-			throw new IllegalArgumentException("file request parameter cannot be null or empty");
+			logger.error("upload file request parameter cannot be null or empty");
+			throw new IllegalArgumentException("upload file request parameter cannot be null or empty");
 		}
 
-		logger.info("Received request to upload FX file: " + file);
+		fxService.upload(uploadFilePath);
 	}
 }
