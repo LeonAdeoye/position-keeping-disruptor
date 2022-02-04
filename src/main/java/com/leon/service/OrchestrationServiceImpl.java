@@ -6,20 +6,25 @@ import com.leon.handler.OutboundJournalEventHandler;
 import com.leon.handler.PublishingEventHandler;
 import com.leon.io.DisruptorReader;
 import com.leon.io.DisruptorWriter;
-import com.leon.io.FileDisruptorReader;
+import com.leon.model.DisruptorPayload;
 import com.leon.model.Inventory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Service;
+
 import javax.annotation.PostConstruct;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+import javax.jms.TextMessage;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class OrchestrationServiceImpl implements OrchestrationService//, MessageListener
+public class OrchestrationServiceImpl implements OrchestrationService, MessageListener
 {
     private static final Logger logger = LoggerFactory.getLogger(OrchestrationServiceImpl.class);
     @Autowired
@@ -70,38 +75,13 @@ public class OrchestrationServiceImpl implements OrchestrationService//, Message
     {
         if(!hasStarted)
         {
-            hasStarted = true;
             logger.info("Now starting to listen to inbound requests...");
             requestReader.start();
             requestReader.readAll().subscribe((request) -> inboundDisruptor.push(request));
+            hasStarted = true;
         }
         else
             logger.error("Cannot start components because they have already been started.");
-    }
-
-    @Override
-    public void recover()
-    {
-        if(!hasStarted)
-        {
-            logger.info("Running in recovery mode first - reading from file: " + inboundJournalRecoveryFilePath);
-            DisruptorReader recoveryReader = new FileDisruptorReader();
-            recoveryReader.start(inboundJournalRecoveryFilePath);
-            recoveryReader.readAll().subscribe((recoveredPayload) ->
-                {
-                    logger.info("Recovered: " + recoveredPayload);
-                    inboundDisruptor.push(recoveredPayload);
-                },
-                error -> logger.error("Error during recovery: " + error),
-                () ->
-                {
-                    logger.info("Recovery completed.");
-                    start();
-                });
-            recoveryReader.stop();
-        }
-        else
-            logger.error("Cannot start components in recovery mode because they have already been started.");
     }
 
     @Override
@@ -118,8 +98,6 @@ public class OrchestrationServiceImpl implements OrchestrationService//, Message
         else
             logger.error("Cannot stop components because they have not been started correctly.");
     }
-
-    // TODO - system needs to be able to reload SOD positions at anytime.
 
     @Override
     public void upload(String sodFilePath)
@@ -162,4 +140,29 @@ public class OrchestrationServiceImpl implements OrchestrationService//, Message
         logger.info("After toggling, the configuration of isPrimary mode is set to: " + isPrimary);
         return isPrimary;
     }
+
+    @Override
+	@JmsListener(destination = "${spring.activemq.position.check.request.topic}")
+	public void onMessage(Message message)
+	{
+        if(!hasStarted)
+            return;
+
+		try
+		{
+			if(message instanceof TextMessage)
+			{
+				TextMessage textMessage = (TextMessage) message;
+				String[] splitInput  = textMessage.getText().split("=");
+				if (splitInput.length == 2)
+                    inboundDisruptor.push(new DisruptorPayload(splitInput[0], splitInput[1]));
+				else
+					logger.error("Cannot push incorrect message onto disruptor because of format: {}. ", textMessage.getText());
+			}
+		}
+		catch(Exception e)
+		{
+			logger.error("Received Exception with processing position check request from JMS listener: " + e.getLocalizedMessage());
+		}
+	}
 }

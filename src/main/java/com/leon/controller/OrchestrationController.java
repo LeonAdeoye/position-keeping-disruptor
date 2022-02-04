@@ -33,14 +33,6 @@ public class OrchestrationController
     }
 
     @CrossOrigin
-    @RequestMapping(value = "/recover", method = RequestMethod.GET)
-    void recover()
-    {
-        logger.info("Received request to recover inbound checks and executions.");
-        orchestrationService.recover();
-    }
-
-    @CrossOrigin
     @RequestMapping(value = "/stop", method = RequestMethod.GET)
     void stop()
     {
