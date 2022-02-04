@@ -1,12 +1,17 @@
 package com.leon.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 
 public class Instrument
 {
+	@JsonProperty("bloombergCode")
 	private String bloombergCode;
+	@JsonProperty("instrumentId")
 	private int instrumentId;
+	@JsonProperty("description")
 	private String description;
+	@JsonProperty("MIC")
 	private String MIC;
 
 	public Instrument()
