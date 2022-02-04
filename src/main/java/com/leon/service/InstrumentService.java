@@ -8,4 +8,5 @@ public interface InstrumentService
 	void put(int instrumentId, Instrument instrument);
 	Optional<Instrument> get(int instrumentId);
 	Optional<Instrument> get(String bloombergCode);
+	public void upload(String uploadFilePath);
 }

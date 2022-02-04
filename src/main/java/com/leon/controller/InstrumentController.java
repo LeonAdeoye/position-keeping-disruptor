@@ -57,14 +57,16 @@ public class InstrumentController
 
 	@CrossOrigin
 	@RequestMapping(value = "/upload", method = RequestMethod.GET)
-	public void uploadInstruments(@RequestParam String file)
+	public void uploadInstruments(@RequestParam String uploadFilePath)
 	{
-		if(file == null || file.isEmpty())
+		if(uploadFilePath == null || uploadFilePath.isEmpty())
 		{
 			logger.error("file request parameter cannot be null or empty");
 			throw new IllegalArgumentException("file request parameter cannot be null or empty");
 		}
 
-		logger.info("Received request to upload instruments: " + file);
+		instrumentService.upload(uploadFilePath);
+
+		logger.info("Received request to upload instruments: " + uploadFilePath);
 	}
 }
