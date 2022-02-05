@@ -10,17 +10,18 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.jms.Message;
+import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 @Service
-public class HeartBeatServiceImpl implements HeartBeatService
+public class HeartBeatServiceImpl implements HeartBeatService, MessageListener
 {
 	private static final Logger logger = LoggerFactory.getLogger(HeartBeatServiceImpl.class);
 	@Autowired
 	private JmsTemplate jmsTemplate;
-	private boolean started = false;
+	private boolean hasStarted = false;
 	@Value("${spring.activemq.heartbeat.topic}")
 	String heartbeatTopic;
 	@Value("${heartbeat.check.maximum.interval}")
@@ -29,31 +30,20 @@ public class HeartBeatServiceImpl implements HeartBeatService
 	private String sender;
 	private LocalDateTime lastTimeStamp;
 
-	HeartBeatServiceImpl(boolean isPrimary)
-	{
-		this.isPrimary = isPrimary;
-	}
-
-	HeartBeatServiceImpl()
-	{
-		this.isPrimary = false;
-	}
-
-	@Override
 	@Scheduled(fixedDelay=100)
 	public void ping()
 	{
-		if(!started)
+		if(!hasStarted)
 			return;
 
 		jmsTemplate.send(heartbeatTopic, s -> s.createTextMessage(isPrimary? "PRIMARY" : "SECONDARY"));
 	}
 
 	@Override
-	@JmsListener(destination = "${spring.activemq.position.check.response.topic}")
-	public void receive(Message message)
+	@JmsListener(destination = "${spring.activemq.heartbeat.topic}")
+	public void onMessage(Message message)
 	{
-		if(!started)
+		if(!hasStarted)
 			return;
 
 		try
@@ -61,11 +51,12 @@ public class HeartBeatServiceImpl implements HeartBeatService
 			if(message instanceof TextMessage)
 			{
 				TextMessage textMessage = (TextMessage) message;
-
 				sender = textMessage.getText();
-				lastTimeStamp = LocalDateTime.now();
+				if(sender.equals(isPrimary ? "PRIMARY" : "SECONDARY"))
+					return;
 
-				logger.info("Received heartbeat message from: {} at time stamp: {}", sender, lastTimeStamp);
+				lastTimeStamp = LocalDateTime.now();
+				logger.info("Received heartbeat message from: {} at: {}", sender, lastTimeStamp);
 			}
 		}
 		catch(Exception e)
@@ -74,21 +65,29 @@ public class HeartBeatServiceImpl implements HeartBeatService
 		}
 	}
 
-	@Scheduled(fixedDelay=1000)
-	private boolean checkHeartbeat()
+	// TODO: act on failure by switching from secondary to primary if primary is down
+	@Scheduled(fixedDelay=200)
+	private void checkHeartbeat()
 	{
-		return started && !sender.isEmpty() && Math.abs(ChronoUnit.MILLIS.between(lastTimeStamp, LocalDateTime.now())) > heartbeatCheckMaximumInterval;
+		if(hasStarted && sender != null && !sender.isEmpty() && sender.equals(isPrimary ? "PRIMARY" : "SECONDARY") && lastTimeStamp !=null)
+		{
+			long gap = Math.abs(ChronoUnit.MILLIS.between(lastTimeStamp, LocalDateTime.now()));
+			if(gap > heartbeatCheckMaximumInterval)
+				logger.error("Heartbeat error!! Sender: {}, lastTimeStamp: {}, gap: {}, maxInterval: {}", sender, lastTimeStamp, gap, heartbeatCheckMaximumInterval);
+		}
 	}
 
 	@Override
-	public void start()
+	public void start(boolean isPrimary)
 	{
-		started = true;
+		this.isPrimary = isPrimary;
+		hasStarted = true;
+		ping();
 	}
 
 	@Override
 	public void stop()
 	{
-		started = false;
+		hasStarted = false;
 	}
 }

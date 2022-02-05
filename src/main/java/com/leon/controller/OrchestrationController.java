@@ -42,16 +42,16 @@ public class OrchestrationController
 
     @CrossOrigin
     @RequestMapping(value = "/uploadSOD", method = RequestMethod.GET)
-    void uploadSOD(@RequestParam String file)
+    void uploadSOD(@RequestParam String uploadFilePath)
     {
-        if(file == null || file.isEmpty())
+        if(uploadFilePath == null || uploadFilePath.isEmpty())
         {
             logger.error("file request parameter cannot be null or empty");
             throw new IllegalArgumentException("file request parameter cannot be null or empty");
         }
 
-        logger.info("Received request to upload SOD file: " + file);
-        orchestrationService.upload(file);
+        logger.info("Received request to upload SOD file: " + uploadFilePath);
+        orchestrationService.upload(uploadFilePath);
     }
 
     @CrossOrigin

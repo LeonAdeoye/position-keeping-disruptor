@@ -39,6 +39,8 @@ public class OrchestrationServiceImpl implements OrchestrationService, MessageLi
     private FxService fxService;
     @Autowired
     private BeanFactory beanFactory;
+    @Autowired
+    private HeartBeatService heartbeatService;
 
     private InventoryCheckEventHandler inventoryCheckEventHandler;
     private DisruptorReader requestReader;
@@ -60,13 +62,11 @@ public class OrchestrationServiceImpl implements OrchestrationService, MessageLi
     {
         inventoryCheckEventHandler = new InventoryCheckEventHandler(outboundDisruptor, instrumentService, fxService);
         inventoryCheckEventHandler.start(chronicleMapFilePath);
-
         responseWriter = beanFactory.getBean(disruptorWriterClass, DisruptorWriter.class);
         requestReader = beanFactory.getBean(disruptorReaderClass, DisruptorReader.class);
-
         inboundDisruptor.start("INBOUND", new InboundJournalEventHandler(), inventoryCheckEventHandler);
         outboundDisruptor.start("OUTBOUND", new OutboundJournalEventHandler(), new PublishingEventHandler(responseWriter));
-
+        heartbeatService.start(true);
         logger.info("Completed initialization of components with isPrimary mode = " + configurationService.isPrimary());
     }
 
@@ -93,6 +93,7 @@ public class OrchestrationServiceImpl implements OrchestrationService, MessageLi
             inboundDisruptor.stop();
             outboundDisruptor.stop();
             requestReader.stop();
+            heartbeatService.stop();
             logger.info("Shutdown and cleanup completed.");
         }
         else
@@ -137,6 +138,7 @@ public class OrchestrationServiceImpl implements OrchestrationService, MessageLi
     {
         boolean isPrimary = responseWriter.togglePrimary();
         configurationService.setPrimary(isPrimary);
+        heartbeatService.start(isPrimary);
         logger.info("After toggling, the configuration of isPrimary mode is set to: " + isPrimary);
         return isPrimary;
     }

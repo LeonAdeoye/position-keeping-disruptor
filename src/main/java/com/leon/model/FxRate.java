@@ -1,7 +1,6 @@
 package com.leon.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.time.LocalDateTime;
 import java.util.Objects;
 
