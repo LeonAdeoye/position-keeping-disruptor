@@ -60,15 +60,16 @@ public class HeartBeatServiceImpl implements HeartBeatService, MessageListener
 					heartbeatUID = splitHeartbeat[1];
 				}
 				else
+				{
+					logger.warn("Heartbeat is not in the correct format.");
 					return;
-
+				}
 				if(heartbeatSender.equals(isPrimary ? "PRIMARY" : "SECONDARY"))
 				{
 					if(!splitHeartbeat[1].equals(uid))
 						logger.error("Another service is also running as {} with a UID: {}", (isPrimary ? "PRIMARY" : "SECONDARY"), heartbeatUID);
 					return;
 				}
-
 				lastTimeStamp = LocalDateTime.now();
 				logger.info("Received heartbeat message from: {} with UID: {} at: {}", heartbeatSender, heartbeatUID, lastTimeStamp);
 			}
