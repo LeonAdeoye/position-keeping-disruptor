@@ -257,7 +257,7 @@ public class InventoryCheckEventHandler implements EventHandler<DisruptorEvent>
         {
             Optional<FxRate> fxRateOptional = fxService.get(executionMessage.getCurrency());
             if(!fxRateOptional.isPresent())
-                logger.warn("FX rate for currency: %s is missing from FX Service. The default FX rate of 1.0 will be used.");
+                logger.warn(String.format("While processing sell execution the FX rate for currency: %s is missing from FX Service. The default FX rate of 1.0 will be used.", executionMessage.getCurrency()));
             inventory.setExecutedCash(inventory.getExecutedCash() + (executionMessage.getExecutedQuantity() * executionMessage.getExecutedPrice() * fxRateOptional.orElse(FxServiceImpl.defaultUSDRate).getFxRateAgainstUSD()));
         }
         else
