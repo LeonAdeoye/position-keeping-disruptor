@@ -141,12 +141,12 @@ public class InventoryCheckEventHandler implements EventHandler<DisruptorEvent>
         if(balance > 0.0 && balance < lockedCash)
         {
             inventory.setReservedCash(inventory.getReservedCash() + balance);
-            logger.info(String.format("Successfully locked PARTIAL cash of %f. The inventory is now: %s", lockedCash, inventory));
+            logger.info(String.format("Successfully locked PARTIAL cash of %f. The inventory is now: %s", balance, inventory));
             return new InventoryCheckResponse(0, 0, OutcomeType.SUCCESS.toString(), checkCashRequestMessage.getReferenceId(), checkCashRequestMessage.getClientId(),
                     checkCashRequestMessage.getInstrumentId(), balance, 0.0, checkCashRequestMessage.getRequestType(), checkCashRequestMessage.getRequestType());
         }
 
-        logger.error(String.format("Unable to cash lock %d for inventory: ", lockedCash, inventory));
+        logger.error(String.format("Failed to lock cash: %d for inventory: %s", lockedCash, inventory));
         return new InventoryCheckResponse(0, 0, OutcomeType.FAILURE.toString(), checkCashRequestMessage.getReferenceId(), checkCashRequestMessage.getClientId(),
                 checkCashRequestMessage.getInstrumentId(), 0.0, 0.0, checkCashRequestMessage.getRequestType(), checkCashRequestMessage.getRequestType());
     }
