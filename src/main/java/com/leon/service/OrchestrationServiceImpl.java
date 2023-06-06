@@ -6,24 +6,19 @@ import com.leon.handler.OutboundJournalEventHandler;
 import com.leon.handler.PublishingEventHandler;
 import com.leon.io.DisruptorReader;
 import com.leon.io.DisruptorWriter;
-import com.leon.model.DisruptorPayload;
 import com.leon.model.Inventory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Service;
 
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import javax.jms.TextMessage;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class OrchestrationServiceImpl implements OrchestrationService, MessageListener
+public class OrchestrationServiceImpl implements OrchestrationService
 {
     private static final Logger logger = LoggerFactory.getLogger(OrchestrationServiceImpl.class);
     @Autowired
@@ -141,29 +136,4 @@ public class OrchestrationServiceImpl implements OrchestrationService, MessageLi
         logger.info("After toggling, the configuration of isPrimary mode is set to: " + isPrimary);
         return isPrimary;
     }
-
-    @Override
-	@JmsListener(destination = "${spring.activemq.position.check.request.topic}")
-	public void onMessage(Message message)
-	{
-        if(!hasStarted)
-            return;
-
-		try
-		{
-			if(message instanceof TextMessage)
-			{
-				TextMessage textMessage = (TextMessage) message;
-				String[] splitInput  = textMessage.getText().split("=");
-				if (splitInput.length == 2)
-                    inboundDisruptor.push(new DisruptorPayload(splitInput[0], splitInput[1]));
-				else
-					logger.error("Cannot push incorrect message onto disruptor because of format: {}. ", textMessage.getText());
-			}
-		}
-		catch(Exception e)
-		{
-			logger.error("Received Exception with processing position check request from JMS listener: " + e.getLocalizedMessage());
-		}
-	}
 }

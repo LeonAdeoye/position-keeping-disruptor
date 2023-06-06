@@ -8,7 +8,6 @@ public interface DisruptorReader
 {
     void start();
     void start(ConfigurationServiceImpl configurationService);
-
     Flux<DisruptorPayload> readAll();
     void stop();
 }
