@@ -75,7 +75,7 @@ public class OrchestrationServiceImpl implements OrchestrationService, MessageLi
         {
             logger.info("Now starting to listen to inbound requests...");
             requestReader.start();
-            requestReader.readAll().subscribe((request) -> inboundDisruptor.push(request));
+            requestReader.readAll().subscribe(inboundDisruptor::push, err -> logger.error(err.getMessage()));
             hasStarted = true;
         }
         else

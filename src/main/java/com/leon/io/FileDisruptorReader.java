@@ -5,6 +5,7 @@ import com.leon.service.ConfigurationServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 
@@ -15,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 @Component("FileDisruptorReader")
+@ConditionalOnProperty(value="file.input.reader", havingValue = "true")
 public class FileDisruptorReader implements DisruptorReader
 {
     private static final Logger logger = LoggerFactory.getLogger(FileDisruptorReader.class);
@@ -54,13 +56,6 @@ public class FileDisruptorReader implements DisruptorReader
     private boolean doesFileExist()
     {
         return Files.exists(Paths.get(readerFilePath));
-    }
-
-    @Override
-    public void start(String readerFilePath)
-    {
-            this.readerFilePath = readerFilePath;
-            start();
     }
 
     @Override
