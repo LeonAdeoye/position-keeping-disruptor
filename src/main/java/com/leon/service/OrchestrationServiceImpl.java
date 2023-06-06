@@ -9,11 +9,9 @@ import com.leon.io.DisruptorWriter;
 import com.leon.model.Inventory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,18 +30,14 @@ public class OrchestrationServiceImpl implements OrchestrationService
     @Autowired
     private FxService fxService;
     @Autowired
-    private BeanFactory beanFactory;
-    @Autowired
     private HeartBeatService heartbeatService;
 
     private InventoryCheckEventHandler inventoryCheckEventHandler;
+    @Autowired
     private DisruptorReader requestReader;
+    @Autowired
     private DisruptorWriter responseWriter;
 
-    @Value("${disruptor.reader.class}")
-    private String disruptorReaderClass;
-    @Value("${disruptor.writer.class}")
-    private String disruptorWriterClass;
     @Value("${inbound.journal.recovery.file.path}")
     private String inboundJournalRecoveryFilePath;
     @Value("${chronicle.map.file.path}")
@@ -55,8 +49,6 @@ public class OrchestrationServiceImpl implements OrchestrationService
     {
         inventoryCheckEventHandler = new InventoryCheckEventHandler(outboundDisruptor, instrumentService, fxService);
         inventoryCheckEventHandler.start(chronicleMapFilePath);
-        responseWriter = beanFactory.getBean(disruptorWriterClass, DisruptorWriter.class);
-        requestReader = beanFactory.getBean(disruptorReaderClass, DisruptorReader.class);
         inboundDisruptor.start("INBOUND", new InboundJournalEventHandler(), inventoryCheckEventHandler);
         outboundDisruptor.start("OUTBOUND", new OutboundJournalEventHandler(), new PublishingEventHandler(responseWriter));
         heartbeatService.start(true);
