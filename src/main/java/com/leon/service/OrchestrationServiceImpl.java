@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
@@ -54,11 +53,10 @@ public class OrchestrationServiceImpl implements OrchestrationService, MessageLi
     private String inboundJournalRecoveryFilePath;
     @Value("${chronicle.map.file.path}")
     private String chronicleMapFilePath;
-
     private boolean hasStarted = false;
 
-    @PostConstruct
-    public void initialization()
+    @Override
+    public void initialize()
     {
         inventoryCheckEventHandler = new InventoryCheckEventHandler(outboundDisruptor, instrumentService, fxService);
         inventoryCheckEventHandler.start(chronicleMapFilePath);
@@ -101,6 +99,7 @@ public class OrchestrationServiceImpl implements OrchestrationService, MessageLi
     }
 
     @Override
+    
     public void upload(String sodFilePath)
     {
         if(!hasStarted)
